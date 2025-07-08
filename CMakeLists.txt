@@ -10,9 +10,14 @@ cmake_policy(SET CMP0072 NEW)
 find_package(OpenGL REQUIRED)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
-
 add_executable(renderer
+  # include/glad/include/glad/glad.h 
+  include/glad/src/glad.c
   src/main.cpp
+)
+
+target_include_directories(renderer PRIVATE 
+  ${CMAKE_SOURCE_DIR}/include
 )
 
 target_link_libraries(renderer
