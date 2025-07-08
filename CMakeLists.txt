@@ -11,7 +11,6 @@ find_package(OpenGL REQUIRED)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 add_executable(renderer
-  # include/glad/include/glad/glad.h 
   include/glad/src/glad.c
   src/main.cpp
 )
