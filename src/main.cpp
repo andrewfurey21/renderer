@@ -82,9 +82,14 @@ int main(void) {
 
   // Vertex data and vbo
   float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
+     0.5f,  0.5f, 0.0f,  // top right
+     0.5f, -0.5f, 0.0f,  // bottom right
+    -0.5f, -0.5f, 0.0f,  // bottom left
+    -0.5f,  0.5f, 0.0f   // top left 
+  };
+  unsigned int indices[] = {  // note that we start from 0!
+    0, 1, 3,   // first triangle
+    1, 2, 3    // second triangle
   };
 
   // vertex array objects - specify multiple vertex attributes all in one place
@@ -92,12 +97,20 @@ int main(void) {
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
 
-  unsigned int vbo;
+  unsigned int vbo; // for storing vertices
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // copy used defined data into the currently bound buffer
+  unsigned int ebo; // for storing indices
+  glGenBuffers(1, &ebo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);  
+
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: add toggle
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
   // compile shaders
   unsigned int vertex_shader = shader_compiler("/home/andrew/dev/graphics/renderer/src/vertex.glsl", GL_VERTEX_SHADER);
@@ -130,7 +143,7 @@ int main(void) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
     glfwPollEvents();
