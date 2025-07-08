@@ -46,6 +46,11 @@ public:
     glUniform1f(location, value);
   }
 
+  void setInt(const std::string& uniform_name, int value) {
+    int location = glGetUniformLocation(program_id, uniform_name.c_str());
+    glUniform1i(location, value);
+  }
+
 private:
   unsigned int program_id;
 
