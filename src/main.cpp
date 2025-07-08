@@ -1,11 +1,11 @@
 #include <cstring>
-#include <string>
 #include <iostream>
-#include <fstream>
-#include <sstream>
+#include <cmath>
 
 #include "../include/glad/glad.h"
 #include <GLFW/glfw3.h>
+
+#include "shader.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
@@ -15,43 +15,6 @@ void process_input(GLFWwindow* window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, true);
   }
-}
-
-unsigned int shader_compiler(const std::string& shader_file_path, unsigned int shader_type) {
-  char* shader_source;
-  std::ifstream shader_stream(shader_file_path, std::ios::in);
-  if (shader_stream.is_open()) {
-    std::stringstream shader_source_stream;
-    shader_source_stream << shader_stream.rdbuf();
-    std::string str = shader_source_stream.str();
-    shader_source = new char[str.size() + 1];
-    std::strcpy(shader_source, str.c_str());
-    shader_stream.close();
-  } else {
-    std::stringstream error_message;
-    error_message << "Shader at '" << shader_file_path << " was not found.";
-    throw std::logic_error(error_message.str());
-  }
-
-  unsigned int shader;
-  shader = glCreateShader(shader_type);
-  glShaderSource(shader, 1, &shader_source, NULL);
-  glCompileShader(shader);
-
-  int shader_compilation_success;
-  char compilation_log[512];
-  glGetShaderiv(shader, GL_COMPILE_STATUS, &shader_compilation_success);
-  if (!shader_compilation_success) {
-    glGetShaderInfoLog(shader, 512, NULL, compilation_log);
-    std::ostringstream error_message;
-    error_message << compilation_log << "\n"
-                  << shader_file_path << "\n"
-                  "\n Shader source code: \n"
-                  << shader_source;
-    throw std::logic_error(error_message.str());
-  }
-
-  return shader;
 }
 
 int main(void) {
@@ -82,14 +45,12 @@ int main(void) {
 
   // Vertex data and vbo
   float vertices[] = {
-     0.5f,  0.5f, 0.0f,  // top right
-     0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f, -0.5f, 0.0f,  // bottom left
-    -0.5f,  0.5f, 0.0f   // top left 
+     0.0f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+     0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f
   };
-  unsigned int indices[] = {  // note that we start from 0!
-    0, 1, 3,   // first triangle
-    1, 2, 3    // second triangle
+  unsigned int indices[] = {
+    0, 1, 2
   };
 
   // vertex array objects - specify multiple vertex attributes all in one place
@@ -106,35 +67,14 @@ int main(void) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);  
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+  glEnableVertexAttribArray(1);
 
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: add toggle
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-  // compile shaders
-  unsigned int vertex_shader = shader_compiler("/home/andrew/dev/graphics/renderer/src/vertex.glsl", GL_VERTEX_SHADER);
-  unsigned int fragment_shader = shader_compiler("/home/andrew/dev/graphics/renderer/src/fragment.glsl", GL_FRAGMENT_SHADER);
-
-  unsigned int shader_program = glCreateProgram();
-  glAttachShader(shader_program, vertex_shader);
-  glAttachShader(shader_program, fragment_shader);
-  glLinkProgram(shader_program);
-
-  // Link shaders
-  int shader_link_success;
-  char link_log[512];
-  glGetProgramiv(shader_program, GL_LINK_STATUS, &shader_link_success);
-  if (!shader_link_success) {
-    glGetProgramInfoLog(shader_program, 512, NULL, link_log);
-    std::ostringstream error_message;
-    error_message << link_log;
-    throw std::logic_error(error_message.str());
-  }
-
-  glUseProgram(shader_program);
-  glDeleteShader(vertex_shader);
-  glDeleteShader(fragment_shader);
+  const std::string vertex_shader = "/home/andrew/dev/graphics/renderer/src/vertex.glsl";
+  const std::string fragment_shader = "/home/andrew/dev/graphics/renderer/src/fragment.glsl";
+  Shader shader(vertex_shader, fragment_shader);
 
   while (!glfwWindowShouldClose(window)) {
     process_input(window);
@@ -142,7 +82,13 @@ int main(void) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    float time = glfwGetTime();
+    float green = (sin(time) / 2.0f) + 0.5f;
+    shader.use();
+    shader.setFloat("green", green);
     glBindVertexArray(vao);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: add toggle
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers(window);
