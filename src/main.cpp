@@ -14,6 +14,8 @@
 #include <GLFW/glfw3.h>
 
 #include "shader.hpp"
+#include "camera.hpp"
+#include "input.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
@@ -44,10 +46,10 @@ int main(void) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 
-  size_t windowWidth = 800;
-  size_t windowHeight = 600;
+  size_t window_width = 800;
+  size_t window_height = 600;
 
-  GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "Renderer", NULL, NULL);
+  GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Renderer", NULL, NULL);
   if (window == NULL) {
     std::cout << "Failed to create window.\n";
     glfwTerminate();
@@ -61,7 +63,7 @@ int main(void) {
     return -1;
   }
 
-  glViewport(0, 0, windowWidth, windowHeight);
+  glViewport(0, 0, window_width, window_height);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
   glEnable(GL_BLEND);
@@ -176,8 +178,6 @@ int main(void) {
 
 
 
-  glm::mat4 projection = glm::perspective(glm::radians(45.0f), windowWidth / (float)windowHeight, 0.1f, 10.0f);
-  shader.setMat4("projection", projection);
 
   std::vector<glm::vec3> cubePositions = {
     glm::vec3( 0.0f,  0.0f,  -6.0f),
@@ -192,8 +192,17 @@ int main(void) {
     glm::vec3(-1.3f,  1.0f, -1.5f)
   };
 
+  Camera camera(45.0f, (float)window_width, (float)window_height,
+                  0.1f, 10.0f, 0.01f, 0.15f);
+  Input input(window);
+  bool debug_mode = false;
+  shader.setMat4("projection", camera.projection());
+
   while (!glfwWindowShouldClose(window)) {
     process_input(window);
+
+    input.keyboard(camera, &debug_mode);
+    input.mouse(camera, window_width, window_height);
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -213,9 +222,9 @@ int main(void) {
     for(unsigned int i = 0; i < cubePositions.size(); i++) {
       float angle = 20.0f * i;
       glm::mat4 model = glm::rotate(glm::mat4(1.0f), (float)sin((float)glfwGetTime()) * glm::radians(50.0f), cubePositions[i]);
+      model = glm::translate(model, cubePositions[i]);
 
-      glm::mat4 view = glm::translate(glm::mat4(1.0f), cubePositions[i]);
-      shader.setMat4("view", view);
+      shader.setMat4("view", camera.view());
       shader.setMat4("model", model);
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }

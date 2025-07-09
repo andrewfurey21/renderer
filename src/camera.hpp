@@ -1,0 +1,87 @@
+#ifndef CAMERA_HPP
+#define CAMERA_HPP
+
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_transform.hpp"
+
+
+class Camera {
+private:
+  float fovy;
+  float aspect_ratio;
+  float near, far;
+
+  float move_speed;
+  float angular_speed;
+
+  float width, height;
+
+  glm::vec3 position;
+  glm::vec3 view_direction;
+  glm::vec3 up_vector;
+
+  glm::mat4 proj;
+
+  glm::vec2 previous_mouse;
+
+  float pitch;
+
+public:
+  float yaw;
+  Camera(float fovy, float width, float height, float near, float far,
+         float move_speed, float angular_speed)
+      : fovy(fovy), width(width), height(height), aspect_ratio(width / height),
+        near(near), far(far), move_speed(move_speed),
+        angular_speed(angular_speed), yaw(-90.0f), pitch(0.0f) {
+    proj = glm::perspective(glm::radians(fovy), aspect_ratio, near, far);
+
+    position = glm::vec3(0.0f, 0.0f, 0.0f);
+    view_direction = glm::vec3(0.0f, 0.0f, -1.0f);
+    up_vector = glm::vec3(0.0f, 1.0f, 0.0f);
+
+    previous_mouse = glm::vec2(width / 2, height / 2);
+  }
+
+  glm::mat4 view() const {
+    return glm::lookAt(position, position + view_direction, up_vector);
+  }
+
+  glm::mat4 projection() const { return proj; }
+
+  void forward() { position += glm::normalize(view_direction) * move_speed; }
+
+  void backward() { position -= glm::normalize(view_direction) * move_speed; }
+
+  void left() {
+    glm::vec3 direction = glm::cross(view_direction, up_vector);
+    position -= glm::normalize(direction) * move_speed;
+  }
+
+  void right() {
+    glm::vec3 direction = glm::cross(view_direction, up_vector);
+    position += glm::normalize(direction) * move_speed;
+  }
+
+  void up() { position += glm::normalize(up_vector) * move_speed; }
+
+  void down() { position -= glm::normalize(up_vector) * move_speed; }
+
+  void mouse_look(glm::vec2 new_mouse) {
+    glm::vec2 mouse_delta = previous_mouse - new_mouse;
+    mouse_delta *= angular_speed;
+    yaw -= mouse_delta.x;
+    pitch += mouse_delta.y;
+
+    pitch = glm::clamp(pitch, -89.0f, 89.0f);
+
+    glm::vec3 new_view_direction;
+    new_view_direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    new_view_direction.y = sin(glm::radians(pitch));
+    new_view_direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    view_direction = glm::normalize(new_view_direction);
+
+    previous_mouse = new_mouse;
+  }
+};
+
+#endif
