@@ -10,6 +10,10 @@
 
 #include "../include/glad/glad.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 class Shader {
 public:
   Shader(const std::string& vertex_shader_file_path,
@@ -37,8 +41,12 @@ public:
     glDeleteShader(fragment_shader);
   }
 
-  void use() {
+  void bind() {
     glUseProgram(program_id);
+  }
+
+  void unbind() {
+    glUseProgram(0);
   }
 
   void setFloat(const std::string& uniform_name, float value) {
@@ -47,8 +55,15 @@ public:
   }
 
   void setInt(const std::string& uniform_name, int value) {
+    bind();
     int location = glGetUniformLocation(program_id, uniform_name.c_str());
     glUniform1i(location, value);
+  }
+
+  void setMat4(const std::string& uniform_name, glm::mat4 value) {
+    bind();
+    int location = glGetUniformLocation(program_id, uniform_name.c_str());
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
   }
 
 private:
