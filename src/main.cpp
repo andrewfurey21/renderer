@@ -13,9 +13,15 @@
 #include "../include/glad/glad.h"
 #include <GLFW/glfw3.h>
 
+#include "../imgui/imgui.h"
+#include "../imgui/imgui_impl_glfw.h"
+#include "../imgui/imgui_impl_opengl3.h"
+
+#include "helpers.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
 #include "input.hpp"
+
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
@@ -46,8 +52,8 @@ int main(void) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 
-  size_t window_width = 800;
-  size_t window_height = 600;
+  int window_width = 800;
+  int window_height = 600;
 
   GLFWwindow* window = glfwCreateWindow(window_width, window_height, "Renderer", NULL, NULL);
   if (window == NULL) {
@@ -64,6 +70,7 @@ int main(void) {
   }
 
   glViewport(0, 0, window_width, window_height);
+  GL_CHECK_ERROR();
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
   glEnable(GL_BLEND);
@@ -195,11 +202,33 @@ int main(void) {
   Camera camera(45.0f, (float)window_width, (float)window_height,
                   0.1f, 10.0f, 0.01f, 0.15f);
   Input input(window);
-  bool debug_mode = false;
+  bool debug_mode = true;
   shader.setMat4("projection", camera.projection());
+
+  // ImGUI
+  const char *glsl_version = "#version 330 core";
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init(glsl_version);
+  ImGui::StyleColorsDark();
+  ImGuiIO &io = ImGui::GetIO();
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
   while (!glfwWindowShouldClose(window)) {
     process_input(window);
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    if (debug_mode) {
+      ImGui::Begin("Editor");
+
+      // ImGui::SliderFloat("earth X", &earth_model.x, -2.0f, 2.0f);
+      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                  1000.0f / io.Framerate, io.Framerate);
+      // ImGui::Text("# of Draw Calls: %d", renderer.getDrawCalls());
+      ImGui::End();
+    }
 
     input.keyboard(camera, &debug_mode);
     input.mouse(camera, window_width, window_height);
@@ -229,6 +258,10 @@ int main(void) {
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
+    ImGui::Render();
+    glfwGetFramebufferSize(window, &window_width, &window_height);
+    glViewport(0, 0, window_width, window_height);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
