@@ -145,9 +145,6 @@ int main(void) {
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
-  // glEnableVertexAttribArray(1);
-  // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-  // glEnableVertexAttribArray(1);
   // --------------------------------------------------
   // ---------------- Light source ---------------------
   unsigned int light_vao;
@@ -167,7 +164,7 @@ int main(void) {
   const std::string image_file_path =
     "/home/andrew/dev/graphics/renderer/assets/crate.png";
   int width, height, channels;
-  unsigned char* image = load_image(image_file_path, &width, 
+  unsigned char* image = load_image(image_file_path, &width,
     &height, &channels);
 
   unsigned int texture1;
@@ -183,6 +180,29 @@ int main(void) {
   glGenerateMipmap(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
   stbi_image_free(image);
+
+
+
+  const std::string other_file_path =
+    // "/home/andrew/dev/graphics/renderer/assets/outer_crate.png";
+    "/home/andrew/dev/graphics/renderer/assets/outer_crate.png";
+  // int width, height, channels;
+  unsigned char* other_image = load_image(other_file_path, &width,
+    &height, &channels);
+
+  unsigned int texture2;
+  glGenTextures(1, &texture2);
+  glBindTexture(GL_TEXTURE_2D, texture2);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // how to resample down
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // how to resample up
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, other_image);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  stbi_image_free(other_image);
   // ----------------------------------------------
 
   glm::vec3 light_color(1.0f, 1.0f, 1.0f);
@@ -242,6 +262,9 @@ int main(void) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
 
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+
     // glBindVertexArray(vao);
 
     // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
@@ -259,19 +282,12 @@ int main(void) {
     box_shader.setMat4("model", model);
     // box_shader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
     box_shader.setInt("material.diffuse", 0);
-    box_shader.setVec3("material.specular",glm::vec3( 0.5f, 0.5f, 0.5f));
+    box_shader.setInt("material.specular", 1);
+    // box_shader.setVec3("material.specular",glm::vec3( 0.5f, 0.5f, 0.5f));
     box_shader.setFloat("material.shininess", 32.0f);
     box_shader.setVec3("light.position", glm::vec3(0.0f, 2.0f, -9.0f));
     box_shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
     box_shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
-    // glm::vec3 lightColor;
-    // lightColor.x = sin(glfwGetTime() * 2.0f);
-    // lightColor.y = sin(glfwGetTime() * 0.7f);
-    // lightColor.z = sin(glfwGetTime() * 1.3f);
-    // glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f); 
-    // glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); 
-    // box_shader.setVec3("light.ambient", ambientColor);
-    // box_shader.setVec3("light.diffuse", diffuseColor);
     box_shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
     glDrawArrays(GL_TRIANGLES, 0, 36);
     // ----------------------------------------

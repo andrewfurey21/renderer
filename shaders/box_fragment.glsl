@@ -12,8 +12,10 @@ uniform vec3 cameraPosition;
 uniform vec3 objectColor;
 
 struct Material {
+    // vec3 diffuse;
     sampler2D diffuse;
-    vec3 specular;
+    // vec3 specular;
+    sampler2D specular;
     float shininess;
 };
 
@@ -42,7 +44,8 @@ void main() {
     vec3 normViewDirection = normalize(cameraPosition - fragmentPosition);
     vec3 reflectDirection = reflect(-normLightDir, normFragmentNormal);
     float spec = pow(max(dot(normViewDirection, reflectDirection), 0.0f), material.shininess);
-    vec3 specular = light.specular * lightColor * (spec * material.specular);
+    // vec3 specular = light.specular * lightColor * (spec * material.specular);
+    vec3 specular = light.specular * lightColor * (spec * vec3(texture(material.specular, fragmentTextureCoord)));
 
     fragColor = vec4((ambient + diffuse + specular) * objectColor, 1.0f);
 }
