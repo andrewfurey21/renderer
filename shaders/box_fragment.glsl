@@ -6,25 +6,45 @@ in vec3 fragmentPosition;
 out vec4 fragColor;
 
 uniform vec3 lightColor;
-uniform vec3 lightPosition;
 uniform vec3 cameraPosition;
 
 uniform vec3 objectColor;
 
+struct Material {
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+};
+
+uniform Material material;
+
+struct Light {
+    vec3 position;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+uniform Light light;
+
 void main() {
-    float ambientStrength = 0.1;
-    vec3 ambient = ambientStrength * lightColor;
+    // vec3 ambientLight = light.ambient
+    // vec3 diffuseLight = light.diffuse
+    // vec3 specularLight = light.specular
+
+    vec3 ambient = light.ambient * lightColor * material.ambient;
 
     vec3 normFragmentNormal = normalize(fragmentNormal);
-    vec3 normLightDir = normalize(lightPosition - fragmentPosition);
+    vec3 normLightDir = normalize(light.position - fragmentPosition);
     float diff = max(dot(normFragmentNormal, normLightDir), 0.0f);
-    vec3 diffuse = diff * lightColor;
+    vec3 diffuse = light.diffuse * lightColor * (diff * material.diffuse);
 
-    float specularStrength = 0.5;
     vec3 normViewDirection = normalize(cameraPosition - fragmentPosition);
     vec3 reflectDirection = reflect(-normLightDir, normFragmentNormal);
-    float spec = pow(max(dot(normViewDirection, reflectDirection), 0.0f), 32);
-    vec3 specular = specularStrength * spec * lightColor;
+    float spec = pow(max(dot(normViewDirection, reflectDirection), 0.0f), material.shininess);
+    vec3 specular = light.specular * lightColor * (spec * material.specular);
 
     fragColor = vec4((ambient + diffuse + specular) * objectColor, 1.0f);
 }

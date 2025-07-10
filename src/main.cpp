@@ -254,7 +254,22 @@ int main(void) {
     box_shader.setMat4("view", camera.view());
     box_shader.setVec3("cameraPosition", camera.pos());
     box_shader.setMat4("model", model);
-    box_shader.setVec3("lightPosition", glm::vec3(0.0f, 2.0f, -9.0f));
+    box_shader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+    box_shader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+    box_shader.setVec3("material.specular",glm::vec3( 0.5f, 0.5f, 0.5f));
+    box_shader.setFloat("material.shininess", 32.0f);
+    box_shader.setVec3("light.position", glm::vec3(0.0f, 2.0f, -9.0f));
+    // box_shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
+    // box_shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
+    glm::vec3 lightColor;
+    lightColor.x = sin(glfwGetTime() * 2.0f);
+    lightColor.y = sin(glfwGetTime() * 0.7f);
+    lightColor.z = sin(glfwGetTime() * 1.3f);
+    glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f); 
+    glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); 
+    box_shader.setVec3("light.ambient", ambientColor);
+    box_shader.setVec3("light.diffuse", diffuseColor);
+    box_shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
     glDrawArrays(GL_TRIANGLES, 0, 36);
     // ----------------------------------------
 
