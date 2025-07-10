@@ -82,6 +82,8 @@ public:
 
     previous_mouse = new_mouse;
   }
+
+  glm::vec3 pos() { return position; }
 };
 
 #endif

@@ -252,6 +252,7 @@ int main(void) {
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
 
     box_shader.setMat4("view", camera.view());
+    box_shader.setVec3("cameraPosition", camera.pos());
     box_shader.setMat4("model", model);
     box_shader.setVec3("lightPosition", glm::vec3(0.0f, 2.0f, -9.0f));
     glDrawArrays(GL_TRIANGLES, 0, 36);
