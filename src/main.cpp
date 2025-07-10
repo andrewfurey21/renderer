@@ -16,7 +16,6 @@
 #include "../imgui/imgui_impl_glfw.h"
 #include "../imgui/imgui_impl_opengl3.h"
 
-#include "helpers.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
 #include "input.hpp"
@@ -183,24 +182,24 @@ int main(void) {
   // stbi_image_free(image);
   // ----------------------------------------------
 
-  glm::vec4 light_color(0.0f, 1.0f, 0.0f, 1.0f);
+  glm::vec3 light_color(1.0f, 1.0f, 1.0f);
 
   const std::string box_vertex_shader = "/home/andrew/dev/graphics/renderer/shaders/box_vertex.glsl";
   const std::string box_fragment_shader = "/home/andrew/dev/graphics/renderer/shaders/box_fragment.glsl";
   Shader box_shader(box_vertex_shader, box_fragment_shader);
-  box_shader.setVec4("lightColor", light_color);
-  box_shader.setVec4("color", glm::vec4(0.95f, 0.30f, 0.25f, 1.0f));
+  box_shader.setVec3("lightColor", light_color);
+  box_shader.setVec3("objectColor", glm::vec3(0.95f, 0.30f, 0.25f));
 
   const std::string vertex_shader = "/home/andrew/dev/graphics/renderer/shaders/default_vertex.glsl";
   const std::string fragment_shader = "/home/andrew/dev/graphics/renderer/shaders/default_fragment.glsl";
   Shader default_shader(vertex_shader, fragment_shader);
-  default_shader.setVec4("color", light_color);
+  default_shader.setVec3("color", light_color);
   // shader.setInt("texture1", 0);
 
   Camera camera(45.0f, (float)window_width, (float)window_height,
                   0.1f, 10.0f, 0.05f, 0.15f);
   Input input(window);
-  bool debug_mode = true;
+  bool debug_mode = false;
   box_shader.setMat4("projection", camera.projection());
   default_shader.setMat4("projection", camera.projection());
 
