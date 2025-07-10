@@ -50,6 +50,7 @@ public:
   }
 
   void setFloat(const std::string& uniform_name, float value) {
+    bind();
     int location = glGetUniformLocation(program_id, uniform_name.c_str());
     glUniform1f(location, value);
   }
@@ -58,6 +59,12 @@ public:
     bind();
     int location = glGetUniformLocation(program_id, uniform_name.c_str());
     glUniform1i(location, value);
+  }
+
+  void setVec4(const std::string& uniform_name, glm::vec4 vec) {
+    bind();
+    int location = glGetUniformLocation(program_id, uniform_name.c_str());
+    glUniform4f(location, vec.x, vec.y, vec.z, vec.w);
   }
 
   void setMat4(const std::string& uniform_name, glm::mat4 value) {

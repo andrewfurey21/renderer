@@ -1,7 +1,6 @@
 #include <cstring>
 #include <iostream>
 #include <cmath>
-#include <vector>
 
 #include <stb/stb_image.h>
 
@@ -51,7 +50,6 @@ int main(void) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-
   int window_width = 800;
   int window_height = 600;
 
@@ -70,7 +68,6 @@ int main(void) {
   }
 
   glViewport(0, 0, window_width, window_height);
-  GL_CHECK_ERROR();
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
   glEnable(GL_BLEND);
@@ -78,58 +75,49 @@ int main(void) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDepthFunc(GL_LEQUAL);
 
-
-  // Vertex data and vbo
-  // float vertices[] = {
-  //    0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,
-  //    0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-  //   -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,
-  //   -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f,
-  // };
-
   // box
   float vertices[] = {
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,//  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,//  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,//  1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,//  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,//  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,//  0.0f, 0.0f,
 
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,//  0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,//  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,//  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,//  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,//  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,//  0.0f, 0.0f,
 
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,//  1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,//  1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,//  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,//  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,//  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,//  1.0f, 0.0f,
 
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,//  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,//  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,//  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,//  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,//  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,//  1.0f, 0.0f,
 
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,//  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,//  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,//  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,//  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,//  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,//  0.0f, 1.0f,
 
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    -0.5f,  0.5f, -0.5f,//  0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,//  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,//  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,//  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,//  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,//  0.0f, 1.0f
   };
   // unsigned int indices[] = {
   //   0, 1, 2,
@@ -137,73 +125,84 @@ int main(void) {
   // };
 
   // vertex array objects - specify multiple vertex attributes all in one place
-  unsigned int vao;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
+  // ------------------ Box -------------------------
+  unsigned int box_vao;
+  glGenVertexArrays(1, &box_vao);
+  glBindVertexArray(box_vao);
 
-  unsigned int vbo; // for storing vertices
-  glGenBuffers(1, &vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  unsigned int box_vbo; // for storing vertices
+  glGenBuffers(1, &box_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, box_vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // copy used defined data into the currently bound buffer
   // unsigned int ebo; // for storing indices
   // glGenBuffers(1, &ebo);
   // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
   // glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(0);
   // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
   // glEnableVertexAttribArray(1);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-  glEnableVertexAttribArray(1);
+  // glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+  // glEnableVertexAttribArray(1);
+  // --------------------------------------------------
+  // ---------------- Light source ---------------------
+  unsigned int light_vao;
+  glGenVertexArrays(1, &light_vao);
+  glBindVertexArray(light_vao);
+  
+  unsigned int light_vbo;
+  glGenBuffers(1, &light_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, light_vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  const std::string image_file_path =
-    "/home/andrew/dev/graphics/renderer/assets/box.png";
-  int width, height, channels;
-  unsigned char* image = load_image(image_file_path, &width, 
-    &height, &channels);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(0);
+  // --------------------------------------------------
 
-  unsigned int texture1;
-  glGenTextures(1, &texture1);
-  glBindTexture(GL_TEXTURE_2D, texture1);
+  // ---------------- Texture ---------------------
+  // const std::string image_file_path =
+  //   "/home/andrew/dev/graphics/renderer/assets/box.png";
+  // int width, height, channels;
+  // unsigned char* image = load_image(image_file_path, &width, 
+  //   &height, &channels);
+  //
+  // unsigned int texture1;
+  // glGenTextures(1, &texture1);
+  // glBindTexture(GL_TEXTURE_2D, texture1);
+  //
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // how to resample down
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // how to resample up
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  //
+  // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+  // glGenerateMipmap(GL_TEXTURE_2D);
+  // glBindTexture(GL_TEXTURE_2D, 0);
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // how to resample down
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // how to resample up
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  // stbi_image_free(image);
+  // ----------------------------------------------
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-  glGenerateMipmap(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, 0);
+  glm::vec4 light_color(0.0f, 1.0f, 0.0f, 1.0f);
 
-  stbi_image_free(image);
+  const std::string box_vertex_shader = "/home/andrew/dev/graphics/renderer/shaders/box_vertex.glsl";
+  const std::string box_fragment_shader = "/home/andrew/dev/graphics/renderer/shaders/box_fragment.glsl";
+  Shader box_shader(box_vertex_shader, box_fragment_shader);
+  box_shader.setVec4("lightColor", light_color);
+  box_shader.setVec4("color", glm::vec4(0.95f, 0.30f, 0.25f, 1.0f));
 
-  const std::string vertex_shader = "/home/andrew/dev/graphics/renderer/src/vertex.glsl";
-  const std::string fragment_shader = "/home/andrew/dev/graphics/renderer/src/fragment.glsl";
-  Shader shader(vertex_shader, fragment_shader);
-  shader.setInt("texture1", 0);
-
-
-
-
-  std::vector<glm::vec3> cubePositions = {
-    glm::vec3( 0.0f,  0.0f,  -6.0f),
-    glm::vec3( 2.0f,  5.0f, -15.0f),
-    glm::vec3(-1.5f, -2.2f, -2.5f),
-    glm::vec3(-3.8f, -2.0f, -12.3f),
-    glm::vec3( 2.4f, -0.4f, -3.5f),
-    glm::vec3(-1.7f,  3.0f, -7.5f),
-    glm::vec3( 1.3f, -2.0f, -2.5f),
-    glm::vec3( 1.5f,  2.0f, -2.5f),
-    glm::vec3( 1.5f,  0.2f, -1.5f),
-    glm::vec3(-1.3f,  1.0f, -1.5f)
-  };
+  const std::string vertex_shader = "/home/andrew/dev/graphics/renderer/shaders/default_vertex.glsl";
+  const std::string fragment_shader = "/home/andrew/dev/graphics/renderer/shaders/default_fragment.glsl";
+  Shader default_shader(vertex_shader, fragment_shader);
+  default_shader.setVec4("color", light_color);
+  // shader.setInt("texture1", 0);
 
   Camera camera(45.0f, (float)window_width, (float)window_height,
-                  0.1f, 10.0f, 0.01f, 0.15f);
+                  0.1f, 10.0f, 0.05f, 0.15f);
   Input input(window);
   bool debug_mode = true;
-  shader.setMat4("projection", camera.projection());
+  box_shader.setMat4("projection", camera.projection());
+  default_shader.setMat4("projection", camera.projection());
 
   // ImGUI
   const char *glsl_version = "#version 330 core";
@@ -220,43 +219,53 @@ int main(void) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
     if (debug_mode) {
       ImGui::Begin("Editor");
-
-      // ImGui::SliderFloat("earth X", &earth_model.x, -2.0f, 2.0f);
       ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                   1000.0f / io.Framerate, io.Framerate);
-      // ImGui::Text("# of Draw Calls: %d", renderer.getDrawCalls());
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: add toggle
       ImGui::End();
+    } else {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // TODO: add toggle
     }
 
     input.keyboard(camera, &debug_mode);
     input.mouse(camera, window_width, window_height);
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    // model = glm::rotate(model, (float)sin((float)glfwGetTime()) * glm::radians(5.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, texture1);
 
     // glBindVertexArray(vao);
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: add toggle
+
     // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     // glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    shader.bind();
-    glBindVertexArray(vao);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    for(unsigned int i = 0; i < cubePositions.size(); i++) {
-      float angle = 20.0f * i;
-      glm::mat4 model = glm::rotate(glm::mat4(1.0f), (float)sin((float)glfwGetTime()) * glm::radians(50.0f), cubePositions[i]);
-      model = glm::translate(model, cubePositions[i]);
+    // ------------ Draw box ---------------------
+    box_shader.bind();
+    glBindVertexArray(box_vao);
+    glm::mat4 model;
+    model = glm::rotate(glm::mat4(1.0f), glm::radians(54.0f), glm::vec3(1.0f, 2.0f, 3.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, -5.0f));
 
-      shader.setMat4("view", camera.view());
-      shader.setMat4("model", model);
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    box_shader.setMat4("view", camera.view());
+    box_shader.setMat4("model", model);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    // ----------------------------------------
+
+    // ------------ Draw light---------------------
+    default_shader.bind();
+    glBindVertexArray(light_vao);
+    model = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(-1.5f, 3.0f, -9.0f));
+    model = glm::translate(model, glm::vec3(0.0f, 2.0f, -9.0f));
+
+    default_shader.setMat4("view", camera.view());
+    default_shader.setMat4("model", model);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    // ----------------------------------------
 
     ImGui::Render();
     glfwGetFramebufferSize(window, &window_width, &window_height);
