@@ -37,4 +37,5 @@ target_include_directories(renderer PRIVATE
 target_link_libraries(renderer
   glfw
   stb
+  assimp
 )

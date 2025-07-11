@@ -16,6 +16,10 @@
 #include "../imgui/imgui_impl_glfw.h"
 #include "../imgui/imgui_impl_opengl3.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 #include "shader.hpp"
 #include "camera.hpp"
 #include "input.hpp"
@@ -44,6 +48,7 @@ unsigned char* load_image(const std::string& file_path, int* width, int* height,
 }
 
 int main(void) {
+  Assimp::Importer importer;
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -251,7 +256,7 @@ int main(void) {
   Camera camera(45.0f, (float)window_width, (float)window_height,
                   0.1f, 10.0f, 0.05f, 0.15f);
   Input input(window);
-  bool debug_mode = false;
+  bool debug_mode = true;
   box_shader.setMat4("projection", camera.projection());
   default_shader.setMat4("projection", camera.projection());
 
@@ -266,23 +271,9 @@ int main(void) {
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
   while (!glfwWindowShouldClose(window)) {
-    process_input(window);
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-    if (debug_mode) {
-      ImGui::Begin("Editor");
-      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                  1000.0f / io.Framerate, io.Framerate);
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: add toggle
-      ImGui::End();
-    } else {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // TODO: add toggle
-    }
-
+    process_input(window);
     input.keyboard(camera, &debug_mode);
     input.mouse(camera, window_width, window_height);
 
@@ -390,6 +381,20 @@ int main(void) {
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
     // ----------------------------------------
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    if (debug_mode) {
+      ImGui::Begin("Editor");
+      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+                  1000.0f / io.Framerate, io.Framerate);
+      // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: add toggle
+      ImGui::End();
+    } else {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // TODO: add toggle
+    }
 
     ImGui::Render();
     glfwGetFramebufferSize(window, &window_width, &window_height);
