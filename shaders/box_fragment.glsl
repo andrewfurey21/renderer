@@ -25,6 +25,11 @@ struct Light {
     vec3 position;
     // vec3 direction; // for directional light
 
+    // for spotlight
+    vec3 spotDirection;
+    float cutOff;
+    float outerCutOff;
+
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -38,12 +43,16 @@ struct Light {
 uniform Light light;
 
 void main() {
+    vec3 normFragmentNormal = normalize(fragmentNormal);
+    vec3 normLightDir = normalize(light.position - fragmentPosition);
+
+    float theta = dot(normLightDir, normalize(-light.spotDirection));
+    float epsilon = light.cutOff - light.outerCutOff;
+    float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
 
     // vec3 ambient = light.ambient * lightColor * material.ambient;
     vec3 ambient = light.ambient * lightColor * vec3(texture(material.diffuse, fragmentTextureCoord));
 
-    vec3 normFragmentNormal = normalize(fragmentNormal);
-    vec3 normLightDir = normalize(light.position - fragmentPosition);
     // vec3 normLightDir = normalize(-light.direction);
     float diff = max(dot(normFragmentNormal, normLightDir), 0.0f);
     // vec3 diffuse = light.diffuse * lightColor * (diff * material.diffuse);
@@ -56,11 +65,14 @@ void main() {
     vec3 specular = light.specular * lightColor * spec * vec3(texture(material.specular, fragmentTextureCoord));
 
     // point light
-    float distance = length(light.position - fragmentPosition);
-    float attenuation = 1.0 / (light.constant + light.linear * distance +
-                light.quadratic * (distance * distance));
-    ambient *= attenuation;
-    diffuse *= attenuation;
-    specular *= attenuation;
+    // float distance = length(light.position - fragmentPosition);
+    // float attenuation = 1.0 / (light.constant + light.linear * distance +
+    //             light.quadratic * (distance * distance));
+    // ambient *= attenuation;
+    // diffuse *= attenuation;
+    // specular *= attenuation;
+
+    diffuse *= intensity;
+    specular *= intensity;
     fragColor = vec4((ambient + diffuse + specular) * objectColor, 1.0f);
 }

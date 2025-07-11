@@ -300,7 +300,12 @@ int main(void) {
     // box_shader.setVec3("material.specular",glm::vec3( 0.5f, 0.5f, 0.5f));
     box_shader.setFloat("material.shininess", 32.0f);
 
-    box_shader.setVec3("light.position", light_position);
+    // box_shader.setVec3("light.position", light_position);
+    box_shader.setVec3("light.position", camera.pos());
+    box_shader.setVec3("light.spotDirection", camera.view_dir());
+    box_shader.setFloat("light.cutOff",   glm::cos(glm::radians(12.5f)));
+    box_shader.setFloat("light.outerCutOff",   glm::cos(glm::radians(15.0f)));
+
     // box_shader.setVec3("light.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
 
     box_shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
@@ -310,6 +315,7 @@ int main(void) {
     box_shader.setFloat("light.constant",  1.0f);
     box_shader.setFloat("light.linear",    0.09f);
     box_shader.setFloat("light.quadratic", 0.032f);
+
     for(unsigned int i = 0; i < 10; i++) {
       glm::mat4 model(1.0f);
       model = glm::translate(model, cubePositions[i]);
@@ -324,15 +330,15 @@ int main(void) {
     // ----------------------------------------
 
     // ------------ Draw light---------------------
-    default_shader.bind();
-    glBindVertexArray(light_vao);
-    glm::mat4 model;
-    model = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(-1.5f, 3.0f, -9.0f));
-    model = glm::translate(model, light_position);
-
-    default_shader.setMat4("view", camera.view());
-    default_shader.setMat4("model", model);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    // default_shader.bind();
+    // glBindVertexArray(light_vao);
+    // glm::mat4 model;
+    // model = glm::rotate(glm::mat4(1.0f), glm::radians(10.0f), glm::vec3(-1.5f, 3.0f, -9.0f));
+    // model = glm::translate(model, light_position);
+    //
+    // default_shader.setMat4("view", camera.view());
+    // default_shader.setMat4("model", model);
+    // glDrawArrays(GL_TRIANGLES, 0, 36);
     // ----------------------------------------
 
     ImGui::Render();

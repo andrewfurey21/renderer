@@ -46,6 +46,10 @@ public:
     return glm::lookAt(position, position + view_direction, up_vector);
   }
 
+  const glm::vec3& view_dir() const {
+    return view_direction;
+  }
+
   glm::mat4 projection() const { return proj; }
 
   void forward() { position += glm::normalize(view_direction) * move_speed; }
