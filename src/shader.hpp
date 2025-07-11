@@ -104,9 +104,9 @@ private:
       glGetShaderInfoLog(shader, 512, NULL, compilation_log);
       std::ostringstream error_message;
       error_message << compilation_log << "\n"
-                    << shader_file_path << "\n"
-                    "\n Shader source code: \n"
-                    << shader_source;
+                    << shader_file_path << "\n";
+                    // "\n Shader source code: \n"
+                    // << shader_source;
       throw std::logic_error(error_message.str());
     }
 
