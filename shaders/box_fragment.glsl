@@ -22,23 +22,29 @@ struct Material {
 uniform Material material;
 
 struct Light {
-    // vec3 position;
-    vec3 direction; // for directional light
+    vec3 position;
+    // vec3 direction; // for directional light
 
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+
+    // point light
+    float constant;
+    float linear;
+    float quadratic;
 };
 
 uniform Light light;
 
 void main() {
+
     // vec3 ambient = light.ambient * lightColor * material.ambient;
     vec3 ambient = light.ambient * lightColor * vec3(texture(material.diffuse, fragmentTextureCoord));
 
     vec3 normFragmentNormal = normalize(fragmentNormal);
-    // vec3 normLightDir = normalize(light.position - fragmentPosition);
-    vec3 normLightDir = normalize(-light.direction);
+    vec3 normLightDir = normalize(light.position - fragmentPosition);
+    // vec3 normLightDir = normalize(-light.direction);
     float diff = max(dot(normFragmentNormal, normLightDir), 0.0f);
     // vec3 diffuse = light.diffuse * lightColor * (diff * material.diffuse);
     vec3 diffuse = light.diffuse * lightColor * diff * vec3(texture(material.diffuse, fragmentTextureCoord));
@@ -49,5 +55,12 @@ void main() {
     // vec3 specular = light.specular * lightColor * (spec * material.specular);
     vec3 specular = light.specular * lightColor * spec * vec3(texture(material.specular, fragmentTextureCoord));
 
+    // point light
+    float distance = length(light.position - fragmentPosition);
+    float attenuation = 1.0 / (light.constant + light.linear * distance +
+                light.quadratic * (distance * distance));
+    ambient *= attenuation;
+    diffuse *= attenuation;
+    specular *= attenuation;
     fragColor = vec4((ambient + diffuse + specular) * objectColor, 1.0f);
 }
