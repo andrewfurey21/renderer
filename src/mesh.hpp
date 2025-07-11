@@ -18,6 +18,7 @@ struct Vertex {
 struct Texture {
   unsigned int id;
   std::string type;
+  std::string path;
 };
 
 class Mesh {
@@ -75,6 +76,7 @@ public:
     glBindVertexArray(0);
   }
 
+  // returns number of draw calls made
   int draw(Shader& shader) {
     unsigned int diffuse = 1;
     unsigned int specular = 1;
@@ -97,7 +99,7 @@ public:
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
-    return 0;
+    return 1;
   }
 
 private:
