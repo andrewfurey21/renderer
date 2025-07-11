@@ -22,7 +22,8 @@ struct Material {
 uniform Material material;
 
 struct Light {
-    vec3 position;
+    // vec3 position;
+    vec3 direction; // for directional light
 
     vec3 ambient;
     vec3 diffuse;
@@ -36,16 +37,17 @@ void main() {
     vec3 ambient = light.ambient * lightColor * vec3(texture(material.diffuse, fragmentTextureCoord));
 
     vec3 normFragmentNormal = normalize(fragmentNormal);
-    vec3 normLightDir = normalize(light.position - fragmentPosition);
+    // vec3 normLightDir = normalize(light.position - fragmentPosition);
+    vec3 normLightDir = normalize(-light.direction);
     float diff = max(dot(normFragmentNormal, normLightDir), 0.0f);
     // vec3 diffuse = light.diffuse * lightColor * (diff * material.diffuse);
-    vec3 diffuse = light.diffuse * lightColor * (diff * vec3(texture(material.diffuse, fragmentTextureCoord)));
+    vec3 diffuse = light.diffuse * lightColor * diff * vec3(texture(material.diffuse, fragmentTextureCoord));
 
     vec3 normViewDirection = normalize(cameraPosition - fragmentPosition);
     vec3 reflectDirection = reflect(-normLightDir, normFragmentNormal);
     float spec = pow(max(dot(normViewDirection, reflectDirection), 0.0f), material.shininess);
     // vec3 specular = light.specular * lightColor * (spec * material.specular);
-    vec3 specular = light.specular * lightColor * (spec * vec3(texture(material.specular, fragmentTextureCoord)));
+    vec3 specular = light.specular * lightColor * spec * vec3(texture(material.specular, fragmentTextureCoord));
 
     fragColor = vec4((ambient + diffuse + specular) * objectColor, 1.0f);
 }
