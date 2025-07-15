@@ -80,9 +80,9 @@ int main(void) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDepthFunc(GL_LEQUAL);
 
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_FRONT);
-  glFrontFace(GL_CW);
+  // glEnable(GL_CULL_FACE);
+  // glCullFace(GL_FRONT);
+  // glFrontFace(GL_CW);
 
   // box
   float vertices[] = {
@@ -161,6 +161,33 @@ int main(void) {
 	  glm::vec3( 1.0f,  1.0f, 1.0f)
   };
 
+  float quadVertices[] = {
+        // positions   // texture coords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+  };
+
+  glEnable(GL_DEPTH_TEST);
+
+  // ------------------ Screen -------------------------
+
+  unsigned int quadVAO, quadVBO;
+  glGenVertexArrays(1, &quadVAO);
+  glGenBuffers(1, &quadVBO);
+  glBindVertexArray(quadVAO);
+  glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+  glBindVertexArray(0);
+  // -------------------------------------------
 
   // vertex array objects - specify multiple vertex attributes all in one place
   // ------------------ Box -------------------------
@@ -183,20 +210,49 @@ int main(void) {
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
   glEnableVertexAttribArray(2);
+  glBindVertexArray(0);
   // --------------------------------------------------
   // ---------------- Light source ---------------------
-  unsigned int light_vao;
-  glGenVertexArrays(1, &light_vao);
-  glBindVertexArray(light_vao);
-  
-  unsigned int light_vbo;
-  glGenBuffers(1, &light_vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, light_vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-  glEnableVertexAttribArray(0);
+  // unsigned int light_vao;
+  // glGenVertexArrays(1, &light_vao);
+  // glBindVertexArray(light_vao);
+  // 
+  // unsigned int light_vbo;
+  // glGenBuffers(1, &light_vbo);
+  // glBindBuffer(GL_ARRAY_BUFFER, light_vbo);
+  // glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+  //
+  // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+  // glEnableVertexAttribArray(0);
   // --------------------------------------------------
+  // ----------- Frame buffer ------------
+  unsigned int fbo;
+  glGenFramebuffers(1, &fbo);
+  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+  unsigned int colorbuffer;
+  glGenTextures(1, &colorbuffer);
+  glBindTexture(GL_TEXTURE_2D, colorbuffer);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, window_width, window_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorbuffer, 0);
+
+  unsigned int rbo;
+  glGenRenderbuffers(1, &rbo);
+  glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, window_width, window_height);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+  if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    throw std::logic_error("Framebuffer is not complete.");
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  // glDeleteFramebuffers(1, &fbo);
+  // -------------------------------------------
 
   // ---------------- Texture ---------------------
   const std::string image_file_path =
@@ -219,43 +275,45 @@ int main(void) {
   glBindTexture(GL_TEXTURE_2D, 0);
   stbi_image_free(image);
 
-
-
-  const std::string other_file_path =
-    "/home/andrew/dev/graphics/renderer/assets/outer_crate.png";
-  // int width, height, channels;
-  unsigned char* other_image = load_image(other_file_path, &width,
-    &height, &channels);
-
-  unsigned int texture2;
-  glGenTextures(1, &texture2);
-  glBindTexture(GL_TEXTURE_2D, texture2);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // how to resample down
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // how to resample up
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, other_image);
-  glGenerateMipmap(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, 0);
-  stbi_image_free(other_image);
+  // const std::string other_file_path =
+  //   "/home/andrew/dev/graphics/renderer/assets/outer_crate.png";
+  // // int width, height, channels;
+  // unsigned char* other_image = load_image(other_file_path, &width,
+  //   &height, &channels);
+  //
+  // unsigned int texture2;
+  // glGenTextures(1, &texture2);
+  // glBindTexture(GL_TEXTURE_2D, texture2);
+  //
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); // how to resample down
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // how to resample up
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  //
+  // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, other_image);
+  // glGenerateMipmap(GL_TEXTURE_2D);
+  // glBindTexture(GL_TEXTURE_2D, 0);
+  // stbi_image_free(other_image);
   // ----------------------------------------------
 
   // glm::vec3 light_color(1.0f, 1.0f, 1.0f);
 
-  const std::string box_vertex_shader = "/home/andrew/dev/graphics/renderer/shaders/box_vertex.glsl";
-  const std::string box_fragment_shader = "/home/andrew/dev/graphics/renderer/shaders/box_fragment.glsl";
+  const std::string box_vertex_shader = "/home/andrew/dev/graphics/renderer/shaders/basic_texture_vertex.glsl";
+  const std::string box_fragment_shader = "/home/andrew/dev/graphics/renderer/shaders/basic_texture_fragment.glsl";
   Shader box_shader(box_vertex_shader, box_fragment_shader);
+
+  const std::string screen_vertex_shader = "/home/andrew/dev/graphics/renderer/shaders/screen_vertex.glsl";
+  const std::string screen_fragment_shader = "/home/andrew/dev/graphics/renderer/shaders/screen_fragment.glsl";
+  Shader screen_shader(screen_vertex_shader, screen_fragment_shader);
   // box_shader.setVec3("lightColor", light_color);
   // box_shader.setVec3("objectColor", glm::vec3(0.95f, 0.30f, 0.25f));
   // box_shader.setVec3("objectColor", glm::vec3(1.0f));
 
-  const std::string vertex_shader = "/home/andrew/dev/graphics/renderer/shaders/default_vertex.glsl";
-  const std::string fragment_shader = "/home/andrew/dev/graphics/renderer/shaders/default_fragment.glsl";
-  Shader default_shader(vertex_shader, fragment_shader);
+  // const std::string vertex_shader = "/home/andrew/dev/graphics/renderer/shaders/default_vertex.glsl";
+  // const std::string fragment_shader = "/home/andrew/dev/graphics/renderer/shaders/default_fragment.glsl";
+  // Shader default_shader(vertex_shader, fragment_shader);
   // default_shader.setVec3("color", light_color);
-  glm::vec3 light_position(0.0f, 2.0f, -9.0f);
+  // glm::vec3 light_position(0.0f, 2.0f, -9.0f);
 
   Camera camera(45.0f, (float)window_width, (float)window_height,
                   0.1f, 10.0f, 0.05f, 0.15f);
@@ -264,31 +322,26 @@ int main(void) {
   //                     "/home/andrew/dev/graphics/renderer/shaders/basic_model_fragment.glsl");
   Input input(window);
   bool debug_mode = true;
+
   box_shader.setMat4("projection", camera.projection());
-  default_shader.setMat4("projection", camera.projection());
+  box_shader.setInt("inputTexture", 0);
+  screen_shader.setInt("screenTexture", 0);
 
   // ImGUI
-  const char *glsl_version = "#version 330 core";
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  ImGui_ImplGlfw_InitForOpenGL(window, true);
-  ImGui_ImplOpenGL3_Init(glsl_version);
-  ImGui::StyleColorsDark();
-  ImGuiIO &io = ImGui::GetIO();
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  // const char *glsl_version = "#version 330 core";
+  // IMGUI_CHECKVERSION();
+  // ImGui::CreateContext();
+  // ImGui_ImplGlfw_InitForOpenGL(window, true);cmake
+  // ImGui_ImplOpenGL3_Init(glsl_version);
+  // ImGui::StyleColorsDark();
+  // ImGuiIO &io = ImGui::GetIO();
+  // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
   while (!glfwWindowShouldClose(window)) {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     process_input(window);
     input.keyboard(camera, &debug_mode);
     input.mouse(camera, window_width, window_height);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture2);
 
     // glBindVertexArray(vao);
 
@@ -296,115 +349,142 @@ int main(void) {
     // glDrawArrays(GL_TRIANGLES, 0, 36);
 
     // ------------ Draw box ---------------------
-    box_shader.bind();
-    glBindVertexArray(box_vao);
 
-    box_shader.setMat4("view", camera.view());
-    box_shader.setVec3("cameraPosition", camera.pos());
+    // glActiveTexture(GL_TEXTURE1);
+    // glBindTexture(GL_TEXTURE_2D, texture2);
+
+    // box_shader.setVec3("cameraPosition", camera.pos());
 
     // Box material
-    box_shader.setInt("material.diffuse", 0);
-    box_shader.setInt("material.specular", 1);
-    box_shader.setFloat("material.shininess", 32.0f);
+    // box_shader.setInt("material.diffuse", 0);
+    // box_shader.setInt("material.specular", 1);
+    // box_shader.setFloat("material.shininess", 32.0f);
 
-    // Directional Light
-    box_shader.setVec3("sun.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-    box_shader.setVec3("sun.color", glm::vec3(0.95f, 0.56f, 0.18f));
-    box_shader.setFloat("sun.ambient",  0.2f);
-    box_shader.setFloat("sun.diffuse",  0.5f);
-    box_shader.setFloat("sun.specular", 1.0f);
+    // // Directional Light
+    // box_shader.setVec3("sun.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+    // box_shader.setVec3("sun.color", glm::vec3(0.95f, 0.56f, 0.18f));
+    // box_shader.setFloat("sun.ambient",  0.2f);
+    // box_shader.setFloat("sun.diffuse",  0.5f);
+    // box_shader.setFloat("sun.specular", 1.0f);
+    //
+    // // point light 1
+    // box_shader.setVec3("lights[0].position", pointLightPositions[0]);
+    // box_shader.setVec3("lights[0].color", pointLightColors[0]);
+    // box_shader.setFloat("lights[0].ambient", 0.05f);
+    // box_shader.setFloat("lights[0].diffuse", 0.8f);
+    // box_shader.setFloat("lights[0].specular", 1.0f);
+    // box_shader.setFloat("lights[0].constant", 1.0f);
+    // box_shader.setFloat("lights[0].linear", 0.09f);
+    // box_shader.setFloat("lights[0].quadratic", 0.032f);
+    // // point light 2
+    // box_shader.setVec3("lights[1].position", pointLightPositions[1]);
+    // box_shader.setVec3("lights[1].color", pointLightColors[1]);
+    // box_shader.setFloat("lights[1].ambient", 0.05f);
+    // box_shader.setFloat("lights[1].diffuse", 0.8f);
+    // box_shader.setFloat("lights[1].specular", 1.0f);
+    // box_shader.setFloat("lights[1].constant", 1.0f);
+    // box_shader.setFloat("lights[1].linear", 0.09f);
+    // box_shader.setFloat("lights[1].quadratic", 0.032f);
+    // // point light 3
+    // box_shader.setVec3("lights[2].position", pointLightPositions[2]);
+    // box_shader.setVec3("lights[2].color", pointLightColors[2]);
+    // box_shader.setFloat("lights[2].ambient", 0.05f);
+    // box_shader.setFloat("lights[2].diffuse", 0.8f);
+    // box_shader.setFloat("lights[2].specular", 1.0f);
+    // box_shader.setFloat("lights[2].constant", 1.0f);
+    // box_shader.setFloat("lights[2].linear", 0.09f);
+    // box_shader.setFloat("lights[2].quadratic", 0.032f);
+    // // point light 4
+    // box_shader.setVec3("lights[3].position", pointLightPositions[3]);
+    // box_shader.setVec3("lights[3].color", pointLightColors[3]);
+    // box_shader.setFloat("lights[3].ambient", 0.05f);
+    // box_shader.setFloat("lights[3].diffuse", 0.8f);
+    // box_shader.setFloat("lights[3].specular", 1.0f);
+    // box_shader.setFloat("lights[3].constant", 1.0f);
+    // box_shader.setFloat("lights[3].linear", 0.09f);
+    // box_shader.setFloat("lights[3].quadratic", 0.032f);
+    //
+    // box_shader.setVec3("torch.position",  camera.pos());
+    // box_shader.setVec3("torch.direction", camera.view_dir());
+    // box_shader.setVec3("torch.color", glm::vec3(1.0f, 1.0f, 1.0f));
+    // box_shader.setFloat("torch.cutOff",   glm::cos(glm::radians(12.5f)));
+    // box_shader.setFloat("torch.outerCutOff",   glm::cos(glm::radians(15.0f)));
+    // box_shader.setFloat("torch.constant", 1.0f);
+    // box_shader.setFloat("torch.linear", 0.45f);
+    // box_shader.setFloat("torch.quadratic", 0.16f);
 
-    // point light 1
-    box_shader.setVec3("lights[0].position", pointLightPositions[0]);
-    box_shader.setVec3("lights[0].color", pointLightColors[0]);
-    box_shader.setFloat("lights[0].ambient", 0.05f);
-    box_shader.setFloat("lights[0].diffuse", 0.8f);
-    box_shader.setFloat("lights[0].specular", 1.0f);
-    box_shader.setFloat("lights[0].constant", 1.0f);
-    box_shader.setFloat("lights[0].linear", 0.09f);
-    box_shader.setFloat("lights[0].quadratic", 0.032f);
-    // point light 2
-    box_shader.setVec3("lights[1].position", pointLightPositions[1]);
-    box_shader.setVec3("lights[1].color", pointLightColors[1]);
-    box_shader.setFloat("lights[1].ambient", 0.05f);
-    box_shader.setFloat("lights[1].diffuse", 0.8f);
-    box_shader.setFloat("lights[1].specular", 1.0f);
-    box_shader.setFloat("lights[1].constant", 1.0f);
-    box_shader.setFloat("lights[1].linear", 0.09f);
-    box_shader.setFloat("lights[1].quadratic", 0.032f);
-    // point light 3
-    box_shader.setVec3("lights[2].position", pointLightPositions[2]);
-    box_shader.setVec3("lights[2].color", pointLightColors[2]);
-    box_shader.setFloat("lights[2].ambient", 0.05f);
-    box_shader.setFloat("lights[2].diffuse", 0.8f);
-    box_shader.setFloat("lights[2].specular", 1.0f);
-    box_shader.setFloat("lights[2].constant", 1.0f);
-    box_shader.setFloat("lights[2].linear", 0.09f);
-    box_shader.setFloat("lights[2].quadratic", 0.032f);
-    // point light 4
-    box_shader.setVec3("lights[3].position", pointLightPositions[3]);
-    box_shader.setVec3("lights[3].color", pointLightColors[3]);
-    box_shader.setFloat("lights[3].ambient", 0.05f);
-    box_shader.setFloat("lights[3].diffuse", 0.8f);
-    box_shader.setFloat("lights[3].specular", 1.0f);
-    box_shader.setFloat("lights[3].constant", 1.0f);
-    box_shader.setFloat("lights[3].linear", 0.09f);
-    box_shader.setFloat("lights[3].quadratic", 0.032f);
 
-    box_shader.setVec3("torch.position",  camera.pos());
-    box_shader.setVec3("torch.direction", camera.view_dir());
-    box_shader.setVec3("torch.color", glm::vec3(1.0f, 1.0f, 1.0f));
-    box_shader.setFloat("torch.cutOff",   glm::cos(glm::radians(12.5f)));
-    box_shader.setFloat("torch.outerCutOff",   glm::cos(glm::radians(15.0f)));
-    box_shader.setFloat("torch.constant", 1.0f);
-    box_shader.setFloat("torch.linear", 0.45f);
-    box_shader.setFloat("torch.quadratic", 0.16f);
 
-    for(unsigned int i = 0; i < 10; i++) {
-      glm::mat4 model(1.0f);
-      model = glm::translate(model, cubePositions[i]);
+    // for(unsigned int i = 0; i < 10; i++) {
+      // glm::mat4 model(1.0f);
+      // model = glm::translate(model, cubePositions[i]);
       // float angle = 20.0f * i;
       // model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-      box_shader.setMat4("model", model);
-
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+      // box_shader.setMat4("model", model);
+      //
+      // glDrawArrays(GL_TRIANGLES, 0, 36);
+    // }
 
     // glDrawArrays(GL_TRIANGLES, 0, 36);
     // ----------------------------------------
     // ------------ Draw light---------------------
-    default_shader.bind();
-    glBindVertexArray(light_vao);
-
-    for (int i = 0; i < 4; i++) {
-      glm::mat4 model;
-      model = glm::translate(model, pointLightPositions[i]);
-
-      default_shader.setVec3("color", pointLightColors[i]);
-      default_shader.setMat4("view", camera.view());
-      default_shader.setMat4("model", model);
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    // default_shader.bind();
+    // glBindVertexArray(light_vao);
+    //
+    // for (int i = 0; i < 4; i++) {
+    //   glm::mat4 model;
+    //   model = glm::translate(model, pointLightPositions[i]);
+    //
+    //   default_shader.setVec3("color", pointLightColors[i]);
+    //   default_shader.setMat4("view", camera.view());
+    //   default_shader.setMat4("model", model);
+    //   glDrawArrays(GL_TRIANGLES, 0, 36);
+    // }
     // ----------------------------------------
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glEnable(GL_DEPTH_TEST);
+    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
+    box_shader.bind();
+    glm::mat4 model(1.0f);
+    model = glm::translate(model, glm::vec3(0, 0, 0));
+    box_shader.setMat4("model", model);
+    box_shader.setMat4("view", camera.view());
+    glBindVertexArray(box_vao);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture1);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    if (debug_mode) {
-      ImGui::Begin("Editor");
-      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                  1000.0f / io.Framerate, io.Framerate);
-      // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: add toggle
-      ImGui::End();
-    } else {
-      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // TODO: add toggle
-    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDisable(GL_DEPTH_TEST);
+    //
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    //
+    screen_shader.bind();
+    glBindVertexArray(quadVAO);
+    glBindTexture(GL_TEXTURE_2D, colorbuffer);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
-    ImGui::Render();
+    // ImGui_ImplOpenGL3_NewFrame();
+    // ImGui_ImplGlfw_NewFrame();
+    // ImGui::NewFrame();
+    //
+    // if (debug_mode) {
+    //   ImGui::Begin("Editor");
+    //   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+    //               1000.0f / io.Framerate, io.Framerate);
+    //   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // TODO: add toggle
+    //   ImGui::End();
+    // } else {
+    //   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // TODO: add toggle
+    // }
+    //
+    // ImGui::Render();
     glfwGetFramebufferSize(window, &window_width, &window_height);
-    glViewport(0, 0, window_width, window_height);
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
