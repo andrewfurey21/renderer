@@ -21,9 +21,9 @@ public:
       std::ostringstream error_message;
       error_message << "Could not import model at: " << file_path;
       throw std::logic_error(error_message.str());
-      dir = file_path.substr(0, file_path.find_last_of("/"));
-      processNode(scene->mRootNode, scene);
     }
+    dir = file_path.substr(0, file_path.find_last_of("/"));
+    processNode(scene->mRootNode, scene);
   }
 
   int draw(Shader& shader) {
@@ -58,6 +58,7 @@ private:
     glGenTextures(1, &textureID);
   
     int width, height, nrComponents;
+    stbi_set_flip_vertically_on_load(true);
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
     if (data) {
       GLenum format;

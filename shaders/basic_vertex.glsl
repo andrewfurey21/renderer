@@ -8,13 +8,13 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-out vec3 fragmentNormal;
-out vec3 fragmentPosition;
+// out vec3 fragmentNormal;
+// out vec3 fragmentPosition;
 out vec2 fragmentTextureCoord;
 
 void main() {
     gl_Position = projection * view * model * vec4(position, 1.0f);
-    fragmentNormal = mat3(transpose(inverse(model))) * normal;
-    fragmentPosition = vec3(model * vec4(position, 1.0f));
-    fragmentTextureCoord = textureCoord;
+    // fragmentNormal = mat3(transpose(inverse(model))) * normal;
+    // fragmentPosition = vec3(model * vec4(position, 1.0f));
+    fragmentTextureCoord = textureCoords;
 }

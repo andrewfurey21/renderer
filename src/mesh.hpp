@@ -84,12 +84,16 @@ public:
       glActiveTexture(GL_TEXTURE0 + i);
       std::string number;
       std::string name = textures[i].type;
-      if(name == "diffuse")
+      if(name == "texture_diffuse")
         number = std::to_string(diffuse++);
-      else if(name == "specular")
+      else if(name == "texture_specular")
         number = std::to_string(specular++);
-      else
-        throw std::logic_error("Texture type not found.");
+      else {
+        std::ostringstream error_message;
+        error_message << "Texture type not found: "
+                      << name << ".";
+        throw std::logic_error(error_message.str());
+      }
 
       shader.setInt(("material." + name + number).c_str(), i);
       glBindTexture(GL_TEXTURE_2D, textures[i].id);

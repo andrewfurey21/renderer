@@ -20,6 +20,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "model.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
 #include "input.hpp"
@@ -255,6 +256,9 @@ int main(void) {
 
   Camera camera(45.0f, (float)window_width, (float)window_height,
                   0.1f, 10.0f, 0.05f, 0.15f);
+  Model bag_model("/home/andrew/dev/graphics/renderer/assets/backpack/backpack.obj");
+  Shader model_shader("/home/andrew/dev/graphics/renderer/shaders/basic_vertex.glsl",
+                      "/home/andrew/dev/graphics/renderer/shaders/basic_model_fragment.glsl");
   Input input(window);
   bool debug_mode = true;
   box_shader.setMat4("projection", camera.projection());
@@ -277,12 +281,11 @@ int main(void) {
     input.keyboard(camera, &debug_mode);
     input.mouse(camera, window_width, window_height);
 
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture2);
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, texture1);
+    //
+    // glActiveTexture(GL_TEXTURE1);
+    // glBindTexture(GL_TEXTURE_2D, texture2);
 
     // glBindVertexArray(vao);
 
@@ -290,83 +293,90 @@ int main(void) {
     // glDrawArrays(GL_TRIANGLES, 0, 36);
 
     // ------------ Draw box ---------------------
-    box_shader.bind();
-    glBindVertexArray(box_vao);
-
-    box_shader.setMat4("view", camera.view());
-    box_shader.setVec3("cameraPosition", camera.pos());
-
-    // Box material
-    box_shader.setInt("material.diffuse", 0);
-    box_shader.setInt("material.specular", 1);
-    box_shader.setFloat("material.shininess", 32.0f);
-
-    // Directional Light
-    box_shader.setVec3("sun.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-    box_shader.setVec3("sun.color", glm::vec3(0.95f, 0.56f, 0.18f));
-    box_shader.setFloat("sun.ambient",  0.2f);
-    box_shader.setFloat("sun.diffuse",  0.5f);
-    box_shader.setFloat("sun.specular", 1.0f);
-
-    // point light 1
-    box_shader.setVec3("lights[0].position", pointLightPositions[0]);
-    box_shader.setVec3("lights[0].color", pointLightColors[0]);
-    box_shader.setFloat("lights[0].ambient", 0.05f);
-    box_shader.setFloat("lights[0].diffuse", 0.8f);
-    box_shader.setFloat("lights[0].specular", 1.0f);
-    box_shader.setFloat("lights[0].constant", 1.0f);
-    box_shader.setFloat("lights[0].linear", 0.09f);
-    box_shader.setFloat("lights[0].quadratic", 0.032f);
-    // point light 2
-    box_shader.setVec3("lights[1].position", pointLightPositions[1]);
-    box_shader.setVec3("lights[1].color", pointLightColors[1]);
-    box_shader.setFloat("lights[1].ambient", 0.05f);
-    box_shader.setFloat("lights[1].diffuse", 0.8f);
-    box_shader.setFloat("lights[1].specular", 1.0f);
-    box_shader.setFloat("lights[1].constant", 1.0f);
-    box_shader.setFloat("lights[1].linear", 0.09f);
-    box_shader.setFloat("lights[1].quadratic", 0.032f);
-    // point light 3
-    box_shader.setVec3("lights[2].position", pointLightPositions[2]);
-    box_shader.setVec3("lights[2].color", pointLightColors[2]);
-    box_shader.setFloat("lights[2].ambient", 0.05f);
-    box_shader.setFloat("lights[2].diffuse", 0.8f);
-    box_shader.setFloat("lights[2].specular", 1.0f);
-    box_shader.setFloat("lights[2].constant", 1.0f);
-    box_shader.setFloat("lights[2].linear", 0.09f);
-    box_shader.setFloat("lights[2].quadratic", 0.032f);
-    // point light 4
-    box_shader.setVec3("lights[3].position", pointLightPositions[3]);
-    box_shader.setVec3("lights[3].color", pointLightColors[3]);
-    box_shader.setFloat("lights[3].ambient", 0.05f);
-    box_shader.setFloat("lights[3].diffuse", 0.8f);
-    box_shader.setFloat("lights[3].specular", 1.0f);
-    box_shader.setFloat("lights[3].constant", 1.0f);
-    box_shader.setFloat("lights[3].linear", 0.09f);
-    box_shader.setFloat("lights[3].quadratic", 0.032f);
-
-    box_shader.setVec3("torch.position",  camera.pos());
-    box_shader.setVec3("torch.direction", camera.view_dir());
-    box_shader.setVec3("torch.color", glm::vec3(1.0f, 1.0f, 1.0f));
-    box_shader.setFloat("torch.cutOff",   glm::cos(glm::radians(12.5f)));
-    box_shader.setFloat("torch.outerCutOff",   glm::cos(glm::radians(15.0f)));
-    box_shader.setFloat("torch.constant", 1.0f);
-    box_shader.setFloat("torch.linear", 0.45f);
-    box_shader.setFloat("torch.quadratic", 0.16f);
-
-    for(unsigned int i = 0; i < 10; i++) {
-      glm::mat4 model(1.0f);
-      model = glm::translate(model, cubePositions[i]);
-      // float angle = 20.0f * i;
-      // model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-      box_shader.setMat4("model", model);
-
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    // box_shader.bind();
+    // glBindVertexArray(box_vao);
+    //
+    // box_shader.setMat4("view", camera.view());
+    // box_shader.setVec3("cameraPosition", camera.pos());
+    //
+    // // Box material
+    // box_shader.setInt("material.diffuse", 0);
+    // box_shader.setInt("material.specular", 1);
+    // box_shader.setFloat("material.shininess", 32.0f);
+    //
+    // // Directional Light
+    // box_shader.setVec3("sun.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
+    // box_shader.setVec3("sun.color", glm::vec3(0.95f, 0.56f, 0.18f));
+    // box_shader.setFloat("sun.ambient",  0.2f);
+    // box_shader.setFloat("sun.diffuse",  0.5f);
+    // box_shader.setFloat("sun.specular", 1.0f);
+    //
+    // // point light 1
+    // box_shader.setVec3("lights[0].position", pointLightPositions[0]);
+    // box_shader.setVec3("lights[0].color", pointLightColors[0]);
+    // box_shader.setFloat("lights[0].ambient", 0.05f);
+    // box_shader.setFloat("lights[0].diffuse", 0.8f);
+    // box_shader.setFloat("lights[0].specular", 1.0f);
+    // box_shader.setFloat("lights[0].constant", 1.0f);
+    // box_shader.setFloat("lights[0].linear", 0.09f);
+    // box_shader.setFloat("lights[0].quadratic", 0.032f);
+    // // point light 2
+    // box_shader.setVec3("lights[1].position", pointLightPositions[1]);
+    // box_shader.setVec3("lights[1].color", pointLightColors[1]);
+    // box_shader.setFloat("lights[1].ambient", 0.05f);
+    // box_shader.setFloat("lights[1].diffuse", 0.8f);
+    // box_shader.setFloat("lights[1].specular", 1.0f);
+    // box_shader.setFloat("lights[1].constant", 1.0f);
+    // box_shader.setFloat("lights[1].linear", 0.09f);
+    // box_shader.setFloat("lights[1].quadratic", 0.032f);
+    // // point light 3
+    // box_shader.setVec3("lights[2].position", pointLightPositions[2]);
+    // box_shader.setVec3("lights[2].color", pointLightColors[2]);
+    // box_shader.setFloat("lights[2].ambient", 0.05f);
+    // box_shader.setFloat("lights[2].diffuse", 0.8f);
+    // box_shader.setFloat("lights[2].specular", 1.0f);
+    // box_shader.setFloat("lights[2].constant", 1.0f);
+    // box_shader.setFloat("lights[2].linear", 0.09f);
+    // box_shader.setFloat("lights[2].quadratic", 0.032f);
+    // // point light 4
+    // box_shader.setVec3("lights[3].position", pointLightPositions[3]);
+    // box_shader.setVec3("lights[3].color", pointLightColors[3]);
+    // box_shader.setFloat("lights[3].ambient", 0.05f);
+    // box_shader.setFloat("lights[3].diffuse", 0.8f);
+    // box_shader.setFloat("lights[3].specular", 1.0f);
+    // box_shader.setFloat("lights[3].constant", 1.0f);
+    // box_shader.setFloat("lights[3].linear", 0.09f);
+    // box_shader.setFloat("lights[3].quadratic", 0.032f);
+    //
+    // box_shader.setVec3("torch.position",  camera.pos());
+    // box_shader.setVec3("torch.direction", camera.view_dir());
+    // box_shader.setVec3("torch.color", glm::vec3(1.0f, 1.0f, 1.0f));
+    // box_shader.setFloat("torch.cutOff",   glm::cos(glm::radians(12.5f)));
+    // box_shader.setFloat("torch.outerCutOff",   glm::cos(glm::radians(15.0f)));
+    // box_shader.setFloat("torch.constant", 1.0f);
+    // box_shader.setFloat("torch.linear", 0.45f);
+    // box_shader.setFloat("torch.quadratic", 0.16f);
+    //
+    // for(unsigned int i = 0; i < 10; i++) {
+    //   glm::mat4 model(1.0f);
+    //   model = glm::translate(model, cubePositions[i]);
+    //   // float angle = 20.0f * i;
+    //   // model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+    //   box_shader.setMat4("model", model);
+    //
+    //   glDrawArrays(GL_TRIANGLES, 0, 36);
+    // }
 
     // glDrawArrays(GL_TRIANGLES, 0, 36);
     // ----------------------------------------
 
+    // ------------ Draw model ---------------------
+    glm::mat4 model;
+    model = glm::translate(model, glm::vec3(0, 0, 0));
+    model_shader.setMat4("view", camera.view());
+    model_shader.setMat4("model", model);
+    bag_model.draw(model_shader);
+    // ----------------------------------------
     // ------------ Draw light---------------------
     default_shader.bind();
     glBindVertexArray(light_vao);
