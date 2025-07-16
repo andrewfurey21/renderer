@@ -16,6 +16,8 @@
 
 class Shader {
 public:
+  Shader() {}
+
   Shader(const std::string& vertex_shader_file_path,
          const std::string& fragment_shader_file_path) {
     unsigned int vertex_shader = compile(vertex_shader_file_path, GL_VERTEX_SHADER);
