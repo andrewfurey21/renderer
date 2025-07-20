@@ -69,6 +69,12 @@ public:
     glUniform3f(location, vec.x, vec.y, vec.z);
   }
 
+  void setVec2(const std::string& uniform_name, glm::vec2 vec) {
+    bind();
+    int location = glGetUniformLocation(program_id, uniform_name.c_str());
+    glUniform2f(location, vec.x, vec.y);
+  }
+
   void setMat4(const std::string& uniform_name, glm::mat4 value) {
     bind();
     int location = glGetUniformLocation(program_id, uniform_name.c_str());
