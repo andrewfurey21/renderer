@@ -71,9 +71,9 @@ int main(void) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDepthFunc(GL_LEQUAL);
 
-  // Camera camera(45.0f, (float)window_width, (float)window_height,
-  //                 0.1f, 10.0f, 0.05f, 0.15f);
-  // Input input(window);
+  Camera camera(45.0f, (float)window_width, (float)window_height,
+                  0.1f, 100.0f, 0.05f, 0.15f);
+  Input input(window);
   bool debug_mode = true;
 
   // ImGUI
@@ -88,60 +88,90 @@ int main(void) {
 
   float quad_vertices[] = {
     // positions     // colors
-    -0.05f,  0.05f,  1.0f, 0.0f, 0.0f,
-     0.05f, -0.05f,  0.0f, 1.0f, 0.0f,
-    -0.05f, -0.05f,  0.0f, 0.0f, 1.0f,
+    -1.0f,  1.0f,  1.0f, 0.0f, 0.0f,
+     1.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+    -1.0f, -1.0f,  0.0f, 0.0f, 1.0f,
 
-    -0.05f,  0.05f,  1.0f, 0.0f, 0.0f,
-     0.05f, -0.05f,  0.0f, 1.0f, 0.0f,
-     0.05f,  0.05f,  0.0f, 1.0f, 1.0f,
+    -1.0f,  1.0f,  1.0f, 0.0f, 0.0f,
+     1.0f, -1.0f,  0.0f, 1.0f, 0.0f,
+     1.0f,  1.0f,  0.0f, 1.0f, 1.0f,
   };
 
-  glm::vec2 translations[100];
-  int index = 0;
-  float offset = 0.1f;
-  for(int y = -10; y < 10; y += 2) {
-    for(int x = -10; x < 10; x += 2) {
-      glm::vec2 translation;
-      translation.x = (float)x / 10.0f + offset;
-      translation.y = (float)y / 10.0f + offset;
-      translations[index++] = translation;
-    }
-  }
 
-  unsigned int vao;
-  unsigned int vbo;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-  glGenBuffers(1, &vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  unsigned int quad_vao;
+  unsigned int quad_vbo;
+  unsigned int model_vbo;
+
+  glGenVertexArrays(1, &quad_vao);
+  glBindVertexArray(quad_vao);
+  glGenBuffers(1, &quad_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, quad_vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(quad_vertices), &quad_vertices, GL_STATIC_DRAW);
   glEnableVertexAttribArray(0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(2 * sizeof(float)));
-  glBindVertexArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+  int channels = 10000;
+  int rows = 10;
+  int cols = 10;
+  int total = channels * rows * cols;
+  float scale = 0.1f;
+  glm::mat4 *model_matrices = new glm::mat4[rows * cols * channels];
+  for (int i = 0; i < total; i++) {
+    glm::mat4 model(1.0f);
+    int col = i % cols;
+    int row = (i / cols) % rows;
+    int channel = i / (rows * cols);
+
+    glm::vec3 trans = glm::vec3(col, row, channel) * scale * 3.0f;
+    model = glm::translate(model, trans);
+    model = glm::scale(model, glm::vec3(scale));
+    model_matrices[i] = model;
+
+    // std::cout << "Tanslation: " << trans.x << ", " << trans.y << ", " << trans.z << "\n";
+  }
+
+  glGenBuffers(1, &model_vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, model_vbo);
+  glBufferData(GL_ARRAY_BUFFER, total * sizeof(glm::mat4), model_matrices, GL_STATIC_DRAW);
+
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(glm::vec4), (void*)0);
+  glEnableVertexAttribArray(3);
+  glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(glm::vec4), (void*)(1 * sizeof(glm::vec4)));
+  glEnableVertexAttribArray(4);
+  glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(glm::vec4), (void*)(2 * sizeof(glm::vec4)));
+  glEnableVertexAttribArray(5);
+  glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(glm::vec4), (void*)(3 * sizeof(glm::vec4)));
+
+  glVertexAttribDivisor(2, 1);
+  glVertexAttribDivisor(3, 1);
+  glVertexAttribDivisor(4, 1);
+  glVertexAttribDivisor(5, 1);
+
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   Shader instance_shader("/home/andrew/dev/graphics/renderer/shaders/instancing_vertex.glsl",
 			 "/home/andrew/dev/graphics/renderer/shaders/instancing_fragment.glsl");
   instance_shader.bind();
-  for (int i=  0; i < 100; i++) {
-    std::stringstream offset;
-    offset << "offsets[" << std::to_string(i) << "]";
-    instance_shader.setVec2(offset.str(), translations[i]);
-  }
+  instance_shader.setMat4("projection", camera.projection());
 
   while (!glfwWindowShouldClose(window)) {
     process_input(window);
-    // input.keyboard(camera, &debug_mode);
-    // input.mouse(camera, window_width, window_height);
+    input.keyboard(camera, &debug_mode);
+    input.mouse(camera, window_width, window_height);
+
+    instance_shader.setMat4("view", camera.view());
+
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
     instance_shader.bind();
-    glBindVertexArray(vao);
-    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 100);
+    glBindVertexArray(quad_vao);
+    glDrawArraysInstanced(GL_TRIANGLES, 0, 6, total);
 
 
     ImGui_ImplOpenGL3_NewFrame();
