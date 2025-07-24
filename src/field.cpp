@@ -1,3 +1,4 @@
+#include <cmath>
 #include <glm/ext/vector_float3.hpp>
 #include <stdexcept>
 
@@ -8,26 +9,36 @@
 #include "box.hpp"
 
 int main(void) {
-  int width = 800;
-  int height = 600;
+  int width = 1600;
+  int height = 1200;
   float near = 0.1f;
   float far = 100.0f;
   GLFWwindow* window = initialize_glfw(width, height);
   initialize_glad();
   setup_window(window, width, height);
 
-  Camera camera(45.0f, (float)width, (float)height,
+  Camera camera(60.0f, (float)width, (float)height,
                   near, far, 0.05f, 0.15f);
   Input input(window);
 
   // ---------------------- Box -----------------------
   Shader box_shader(
-    "/home/andrew/dev/graphics/renderer/shaders/basic_box_vertex.glsl",
-    "/home/andrew/dev/graphics/renderer/shaders/basic_box_fragment.glsl"
+    "../shaders/basic_box_vertex.glsl",
+    "../shaders/basic_box_fragment.glsl"
   );
-  box_shader.setVec3("color", glm::vec3(1.0f, 0.0f, 0.0f));
-  box_shader.setMat4("projection", camera.projection());
-  Box box(box_shader);
+
+  std::vector<Box> boxes;
+  for (size_t i = 0; i < 10; i++) {
+    boxes.push_back(Box(box_shader));
+    float y = 0;
+    float x = 10 * cos(i);
+    float z = 10 * sin(i);
+    boxes[i].position(x, y, z);
+    float r = static_cast<float>(rand()) / RAND_MAX;
+    float g = static_cast<float>(rand()) / RAND_MAX;
+    float b = static_cast<float>(rand()) / RAND_MAX;
+    boxes[i].color(r, g, b);
+  }
   // ----------------------------------------------------
 
   while (!glfwWindowShouldClose(window)) {
@@ -40,11 +51,12 @@ int main(void) {
     // ----------------------------------------------------
 
     // ---------------------- Scene -----------------------
-
-    box.draw(camera);
-
+    for (Box box: boxes) {
+      box.draw(camera);
+    }
     // ----------------------------------------------------
-    glfwGetFramebufferSize(window, &width, &height);
+    glfwGetWindowSize(window, &width, &height);
+    glfwSetWindowAspectRatio(window, width, height);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
@@ -69,13 +81,14 @@ GLFWwindow* initialize_glfw(int width, int height) {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-
   GLFWwindow* window = glfwCreateWindow(width, height, "Renderer", NULL, NULL);
+  glfwSetWindowAspectRatio(window, width, height);
   if (window == NULL) {
     glfwTerminate();
     throw std::logic_error("Failed to create window");
   }
   glfwMakeContextCurrent(window);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   return window;
 }
 

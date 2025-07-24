@@ -26,8 +26,25 @@ public:
     model = glm::mat4(1.0f);
   }
 
+  void position(float r, float g, float b) {
+    model = glm::translate(model, glm::vec3(r, g, b));
+  }
+
+  void color(float r, float g, float b) {
+    if (r > 1.0f || r < 0.0f || g > 1.0f || g < 0.0f || b > 1.0f || b < 0.0f) {
+      std::ostringstream errorMessage;
+      errorMessage << "Color must be between 0 and 1, you gave " << r << ", " << g << ", " << b;
+      throw std::logic_error(errorMessage.str());
+    }
+    shader.setVec3("color", glm::vec3(r, g, b));
+  }
+
   void draw(Camera& camera) {
     shader.bind();
+    if (camera.projection() != cameraProjection) {
+      cameraProjection = camera.projection();
+      shader.setMat4("projection", camera.projection());
+    }
     shader.setMat4("view", camera.view());
     shader.setMat4("model", model);
     glBindVertexArray(vao);
@@ -38,6 +55,7 @@ private:
   unsigned int vao;
   unsigned int vbo;
 
+  glm::mat4 cameraProjection;
   glm::mat4 model;
 
   Shader shader;
