@@ -7,6 +7,9 @@
 #include "input.hpp"
 #include "shader.hpp"
 #include "box.hpp"
+#include "../imgui/imgui.h"
+#include "../imgui/imgui_impl_glfw.h"
+#include "../imgui/imgui_impl_opengl3.h"
 
 int main(void) {
   int width = 1600;
@@ -41,6 +44,8 @@ int main(void) {
   }
   // ----------------------------------------------------
 
+
+  setup_imgui(window);
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -55,6 +60,8 @@ int main(void) {
       box.draw(camera);
     }
     // ----------------------------------------------------
+    imgui_new_frame(window, width, height);
+
     glfwGetWindowSize(window, &width, &height);
     glfwSetWindowAspectRatio(window, width, height);
     glfwSwapBuffers(window);
@@ -107,4 +114,31 @@ void setup_window(GLFWwindow* window, int width, int height) {
   glEnable(GL_DEPTH_TEST);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glDepthFunc(GL_LEQUAL);
+}
+
+void setup_imgui(GLFWwindow* window) {
+  // ImGUI
+  const char *glsl_version = "#version 330 core";
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init(glsl_version);
+  ImGui::StyleColorsDark();
+  // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+}
+
+void imgui_new_frame(GLFWwindow* window, int width, int height) {
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplGlfw_NewFrame();
+  ImGuiIO& io = ImGui::GetIO();
+  ImGui::NewFrame();
+  ImGui::Begin("Editor");
+  ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+              1000.0f / io.Framerate, io.Framerate);
+  ImGui::End();
+
+  ImGui::Render();
+  glfwGetFramebufferSize(window, &width, &height);
+  glViewport(0, 0, width, height);
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
