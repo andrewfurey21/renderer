@@ -14,7 +14,8 @@ add_executable(renderer
   include/glad/src/glad.c
   # src/helpers.cpp
   # src/main.cpp
-  src/instancing.cpp
+  src/field.cpp
+  # src/instancing.cpp
   imgui/imgui.cpp
   imgui/imgui_demo.cpp
   imgui/imgui_draw.cpp

@@ -12,7 +12,7 @@ public:
   Input(GLFWwindow *window) : window(window) {}
   ~Input() {}
 
-  void keyboard(Camera &camera, bool *debug_mode) {
+  void keyboard(Camera &camera) {
     static bool key_pressed = false;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
       camera.forward();
@@ -33,7 +33,6 @@ public:
 
     } else if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE) {
       if (key_pressed) {
-        *debug_mode = !*debug_mode;
         key_pressed = false;
       }
     }

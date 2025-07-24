@@ -40,7 +40,6 @@ void process_input(GLFWwindow* window) {
 
 
 int main(void) {
-  Assimp::Importer importer;
   glfwInit();
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
