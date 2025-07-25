@@ -54,25 +54,33 @@ public:
     return view_direction;
   }
 
+  void clamp() {
+    if (position.y < 1.0f) {
+      position.y = 1.0f;
+    }
+  }
+
   glm::mat4 projection() const { return proj; }
 
-  void forward() { position += glm::normalize(view_direction) * move_speed; }
+  void forward() { position += glm::normalize(view_direction) * move_speed; clamp(); }
 
-  void backward() { position -= glm::normalize(view_direction) * move_speed; }
+  void backward() { position -= glm::normalize(view_direction) * move_speed; clamp(); }
 
   void left() {
     glm::vec3 direction = glm::cross(view_direction, up_vector);
     position -= glm::normalize(direction) * move_speed;
+    clamp();
   }
 
   void right() {
     glm::vec3 direction = glm::cross(view_direction, up_vector);
     position += glm::normalize(direction) * move_speed;
+    clamp();
   }
 
-  void up() { position += glm::normalize(up_vector) * move_speed; }
+  void up() { position += glm::normalize(up_vector) * move_speed; clamp(); }
 
-  void down() { position -= glm::normalize(up_vector) * move_speed; }
+  void down() { position -= glm::normalize(up_vector) * move_speed; clamp(); }
 
   void mouse_look(glm::vec2 new_mouse) {
     glm::vec2 mouse_delta = previous_mouse - new_mouse;

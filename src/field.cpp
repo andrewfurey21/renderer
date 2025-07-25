@@ -4,6 +4,7 @@
 
 #include "field.hpp"
 #include "camera.hpp"
+#include "grass.hpp"
 #include "input.hpp"
 #include "shader.hpp"
 #include "box.hpp"
@@ -67,31 +68,15 @@ int main(void) {
 
   // ---------------------- grass -----------------------
 
-  size_t num_grass = 100;
-  float grass_height = 2.0f;
-  float grass_y = ground_y + 1.45f;
-  float x_range = 5.0f;
-  float z_range = 5.0f;
-  glm::vec3 grass_axis(0, 1, 0);
+  size_t num_grass = 1000000;
 
-  std::vector<Quad> grass;
+  Shader grass_shader(
+    "../shaders/grass_vertex.glsl",
+    "../shaders/grass_fragment.glsl"
+  );
+  Grass grass(grass_shader, num_grass, ground_y);
+  grass.setTexture("../assets/grass_cut.png");
 
-  for (size_t i = 0; i < num_grass; i++) {
-    float angle = (static_cast<float>(rand()) / RAND_MAX) * 90.0f;
-    float x = (static_cast<float>(rand()) / RAND_MAX) * x_range;
-    float z = (static_cast<float>(rand()) / RAND_MAX) * z_range;
-    Shader quad_shader(
-      "../shaders/grass_vertex.glsl",
-      "../shaders/grass_fragment.glsl"
-    );
-    Quad quad(quad_shader);
-    quad.setTexture("../assets/grass_cut.png");
-    quad.scale(grass_height * 0.30f, grass_height, 0.0);
-    quad.position(x, grass_y, z);
-    quad.rotation(glm::radians(angle), grass_axis);
-
-    grass.push_back(quad);
-  }
   // ---------------------- misc -----------------------
 
   setup_imgui(window);
@@ -116,9 +101,7 @@ int main(void) {
       box.draw(camera);
     }
 
-    for (Quad quad: grass) {
-      quad.draw(camera);
-    }
+    grass.draw(camera);
     // ----------------------------------------------------
 
     imgui_new_frame(window, width, height, camera);
@@ -136,7 +119,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
 }
 
-static bool CURSOR = false;
+static bool CURSOR = true;
 
 void process_input(GLFWwindow* window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
