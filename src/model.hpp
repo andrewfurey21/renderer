@@ -1,6 +1,7 @@
 #ifndef MODEL_HPP
 #define MODEL_HPP
 
+#include <glm/ext/vector_float3.hpp>
 #include <string>
 #include <vector>
 #include <stb/stb_image.h>
@@ -11,10 +12,11 @@
 
 #include "shader.hpp"
 #include "mesh.hpp"
+#include "camera.hpp"
 
 class Model {
 public:
-  Model(const std::string& file_path) {
+  Model(Shader shader, const std::string& file_path) : shader(shader){
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(file_path, aiProcess_Triangulate | aiProcess_FlipUVs);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
@@ -24,16 +26,47 @@ public:
     }
     dir = file_path.substr(0, file_path.find_last_of("/"));
     processNode(scene->mRootNode, scene);
+
+    angle = 0;
+    scale = glm::vec3(1, 1, 1);
+    position = glm::vec3(0, 0, 0);
   }
 
-  int draw(Shader& shader) {
+  int draw(Camera& camera) {
+    glm::mat4 model(1.0f);
+    model = glm::translate(model, position);
+    model = glm::scale(model, scale);
+    model = glm::rotate(model, angle, axis);
+    shader.setMat4("projection", camera.projection());
+    shader.setMat4("view", camera.view());
+    shader.setMat4("model", model);
     int draw_calls = 0;
     for (int i = 0; i < meshes.size(); i++)
       draw_calls += meshes[i].draw(shader);
     return draw_calls;
   }
+
+  void set_pos(float x, float y, float z) {
+    position = glm::vec3(x, y, z);
+  }
+  
+  void set_scale(float x, float y, float z) {
+    scale = glm::vec3(x, y, z);
+  }
+
+  void set_angle(float angle, glm::vec3 axis) {
+    this->angle = glm::radians(angle);
+    this->axis = axis;
+  }
+
 private:
 
+  glm::vec3 position;
+  glm::vec3 scale;
+  float angle;
+  glm::vec3 axis;
+
+  Shader shader;
   std::vector<Mesh> meshes;
   std::string dir;
   std::vector<Texture> textures_loaded;
@@ -58,7 +91,7 @@ private:
     glGenTextures(1, &textureID);
   
     int width, height, nrComponents;
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(false);
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
     if (data) {
       GLenum format;

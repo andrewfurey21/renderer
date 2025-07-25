@@ -6,6 +6,7 @@
 #include "camera.hpp"
 #include "grass.hpp"
 #include "input.hpp"
+#include "model.hpp"
 #include "shader.hpp"
 #include "box.hpp"
 #include "sky.hpp"
@@ -20,7 +21,7 @@ int main(void) {
   int width = 1600;
   int height = 1200;
   float near = 0.1f;
-  float far = 100.0f;
+  float far = 10000.0f;
   GLFWwindow* window = initialize_glfw(width, height);
   initialize_glad();
   setup_window(window, width, height);
@@ -28,7 +29,7 @@ int main(void) {
   // ---------------------- Camera + Input --------------
 
   Camera camera(60.0f, (float)width, (float)height,
-                  near, far, 0.05f, 0.15f);
+                  near, far, 0.2f, 0.15f);
   camera.set_pos(0, 3, 0);
   Input input(window);
 
@@ -77,6 +78,26 @@ int main(void) {
   Grass grass(grass_shader, num_grass, ground_y);
   grass.setTexture("../assets/grass_cut.png");
 
+  // ---------------------- tree -----------------------
+
+  size_t num_trees = 10;
+  std::vector<Model> trees;
+  for (size_t i = 0; i < num_trees; i++) {
+    float x_range = num_trees * 100;
+    float z_range = num_trees * 100;
+    float x = (static_cast<float>(rand()) / RAND_MAX) * x_range - x_range / 2.0f;
+    float z = (static_cast<float>(rand()) / RAND_MAX) * z_range - z_range / 2.0f;
+    // float angle = (static_cast<float>(rand()) / RAND_MAX) * 90.0f;
+    Shader tree_shader(
+      "../shaders/tree_model_vertex.glsl",
+      "../shaders/tree_model_fragment.glsl"
+    );
+    Model tree_model(tree_shader, "../assets/tree/oak_tree.obj");
+    tree_model.set_scale(.05, .09, .05);
+    tree_model.set_angle(270, glm::vec3(1, 0, 0));
+    tree_model.set_pos(x, ground_y, z);
+    trees.push_back(tree_model);
+  }
   // ---------------------- misc -----------------------
 
   setup_imgui(window);
@@ -102,6 +123,9 @@ int main(void) {
     }
 
     grass.draw(camera);
+
+    for (Model tree: trees)
+      tree.draw(camera);
     // ----------------------------------------------------
 
     imgui_new_frame(window, width, height, camera);
@@ -182,7 +206,7 @@ void imgui_new_frame(GLFWwindow* window, int width, int height, Camera& camera) 
   ImGui_ImplGlfw_NewFrame();
   ImGuiIO& io = ImGui::GetIO();
   ImGui::NewFrame();
-  ImGui::Begin("Editor");
+  ImGui::Begin("Debug");
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
               1000.0f / io.Framerate, io.Framerate);
   glm::vec3 pos = camera.pos();
