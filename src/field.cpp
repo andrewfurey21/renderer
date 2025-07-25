@@ -10,7 +10,6 @@
 #include "shader.hpp"
 #include "box.hpp"
 #include "sky.hpp"
-#include "quad.hpp"
 
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_glfw.h"
@@ -27,9 +26,8 @@ int main(void) {
   setup_window(window, width, height);
 
   // ---------------------- Camera + Input --------------
-
   Camera camera(60.0f, (float)width, (float)height,
-                  near, far, 0.2f, 0.15f);
+                  near, far, 1.0f, 0.15f);
   camera.set_pos(0, 3, 0);
   Input input(window);
 
@@ -77,14 +75,22 @@ int main(void) {
   );
   Grass grass(grass_shader, num_grass, ground_y);
   grass.setTexture("../assets/grass_cut.png");
+  // ---------------------- moonlight ------------------
 
+  Shader moon_shader(
+    "../shaders/basic_box_vertex.glsl",
+    "../shaders/basic_box_fragment.glsl"
+  );
+  Box moon(moon_shader);
+  moon.color(1.0f, 1.0f, 1.0f);
+  moon.position(336, 321, 83);
+  // -0.71511, -0.624562, -0.313911
   // ---------------------- tree -----------------------
-
-  size_t num_trees = 10;
+  size_t num_trees = 30;
   std::vector<Model> trees;
   for (size_t i = 0; i < num_trees; i++) {
-    float x_range = num_trees * 100;
-    float z_range = num_trees * 100;
+    float x_range = num_trees * 10;
+    float z_range = num_trees * 10;
     float x = (static_cast<float>(rand()) / RAND_MAX) * x_range - x_range / 2.0f;
     float z = (static_cast<float>(rand()) / RAND_MAX) * z_range - z_range / 2.0f;
     // float angle = (static_cast<float>(rand()) / RAND_MAX) * 90.0f;
@@ -96,8 +102,19 @@ int main(void) {
     tree_model.set_scale(.05, .09, .05);
     tree_model.set_angle(270, glm::vec3(1, 0, 0));
     tree_model.set_pos(x, ground_y, z);
+
+    // Moon Light
+    tree_model.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
+    tree_model.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
+    tree_model.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
+    tree_model.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    tree_model.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
+
+    // cameraPosition, light direction, ambient, diffuse, specular, color
+
     trees.push_back(tree_model);
   }
+
   // ---------------------- misc -----------------------
 
   setup_imgui(window);
@@ -126,6 +143,8 @@ int main(void) {
 
     for (Model tree: trees)
       tree.draw(camera);
+
+    moon.draw(camera);
     // ----------------------------------------------------
 
     imgui_new_frame(window, width, height, camera);

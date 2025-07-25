@@ -59,6 +59,7 @@ public:
     this->axis = axis;
   }
 
+  Shader shader;
 private:
 
   glm::vec3 position;
@@ -66,7 +67,6 @@ private:
   float angle;
   glm::vec3 axis;
 
-  Shader shader;
   std::vector<Mesh> meshes;
   std::string dir;
   std::vector<Texture> textures_loaded;
