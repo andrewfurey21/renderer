@@ -11,11 +11,12 @@ find_package(OpenGL REQUIRED)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 add_executable(renderer
-  include/glad/src/glad.c
-  # src/helpers.cpp
-  # src/main.cpp
   src/field.cpp
+  # src/main.cpp
   # src/instancing.cpp
+
+  include/glad/src/glad.c
+  src/helpers.cpp
   imgui/imgui.cpp
   imgui/imgui_demo.cpp
   imgui/imgui_draw.cpp

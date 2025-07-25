@@ -7,11 +7,14 @@
 #include "input.hpp"
 #include "shader.hpp"
 #include "box.hpp"
+#include "sky.hpp"
+
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_glfw.h"
 #include "../imgui/imgui_impl_opengl3.h"
 
 int main(void) {
+  srand(time(NULL));
   int width = 1600;
   int height = 1200;
   float near = 0.1f;
@@ -24,18 +27,21 @@ int main(void) {
                   near, far, 0.05f, 0.15f);
   Input input(window);
 
-  // ---------------------- Box -----------------------
-  Shader box_shader(
-    "../shaders/basic_box_vertex.glsl",
-    "../shaders/basic_box_fragment.glsl"
-  );
-
+  // ---------------------- Sky -----------------------
+  Sky night_sky("../assets/stars/");
+  // ----------------------------------------------------
+  // ---------------------- Boxes -----------------------
+  size_t num_boxes = 10;
   std::vector<Box> boxes;
-  for (size_t i = 0; i < 10; i++) {
+  for (size_t i = 0; i < num_boxes; i++) {
+    Shader box_shader(
+      "../shaders/basic_box_vertex.glsl",
+      "../shaders/basic_box_fragment.glsl"
+    );
     boxes.push_back(Box(box_shader));
     float y = 0;
-    float x = 10 * cos(i);
-    float z = 10 * sin(i);
+    float x = 10 * cos(glm::radians((float)i * 360.0f / num_boxes));
+    float z = 10 * sin(glm::radians((float)i * 360.0f / num_boxes));
     boxes[i].position(x, y, z);
     float r = static_cast<float>(rand()) / RAND_MAX;
     float g = static_cast<float>(rand()) / RAND_MAX;
@@ -43,8 +49,6 @@ int main(void) {
     boxes[i].color(r, g, b);
   }
   // ----------------------------------------------------
-
-
   setup_imgui(window);
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -56,6 +60,7 @@ int main(void) {
     // ----------------------------------------------------
 
     // ---------------------- Scene -----------------------
+    night_sky.draw(camera);
     for (Box box: boxes) {
       box.draw(camera);
     }
@@ -76,9 +81,17 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
   glViewport(0, 0, width, height);
 }
 
+static bool CURSOR = false;
+
 void process_input(GLFWwindow* window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
     glfwSetWindowShouldClose(window, true);
+  } else if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+    CURSOR = !CURSOR;
+    if (CURSOR)
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    else
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   }
 }
 
@@ -95,7 +108,6 @@ GLFWwindow* initialize_glfw(int width, int height) {
     throw std::logic_error("Failed to create window");
   }
   glfwMakeContextCurrent(window);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   return window;
 }
 

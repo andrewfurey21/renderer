@@ -15,6 +15,18 @@
 #include <stb/stb_image.h>
 #endif
 
+unsigned char* load_image(const std::string& file_path, int* width, int* height, int* channels) {
+  stbi_set_flip_vertically_on_load(1);
+  unsigned char* image = stbi_load(file_path.c_str(), width, height, channels, 0);
+  if (!image) {
+    std::ostringstream error_message;
+    error_message << "Could not open image at: "
+                  << file_path;
+    throw std::logic_error(error_message.str());
+  }
+  return image;
+}
+
 class Sky {
 private:
   unsigned int id;
@@ -26,11 +38,20 @@ private:
   Shader shader;
 
 public:
-  Sky(std::vector<std::string> paths)
-      : id(0), file_paths(paths) {
+  Sky(std::string dir)
+      : id(0) {
+    file_paths = std::vector<std::string> {
+      dir + "px.jpg",
+      dir + "nx.jpg",
+      dir + "py.jpg",
+      dir + "ny.jpg",
+      dir + "pz.jpg",
+      dir + "nz.jpg",
+    };
+
     shader = Shader(
-      "/home/andrew/dev/graphics/renderer/shaders/sky_vertex.glsl",
-      "/home/andrew/dev/graphics/renderer/shaders/sky_fragment.glsl"
+      "../shaders/sky_vertex.glsl",
+      "../shaders/sky_fragment.glsl"
     );
 
     shader.setInt("skyTexture", 0);
