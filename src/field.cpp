@@ -8,6 +8,7 @@
 #include "shader.hpp"
 #include "box.hpp"
 #include "sky.hpp"
+#include "quad.hpp"
 
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_glfw.h"
@@ -23,6 +24,8 @@ int main(void) {
   initialize_glad();
   setup_window(window, width, height);
 
+  // ---------------------- Camera + Input --------------
+
   Camera camera(60.0f, (float)width, (float)height,
                   near, far, 0.05f, 0.15f);
   camera.set_pos(0, 3, 0);
@@ -31,6 +34,7 @@ int main(void) {
   // ---------------------- Sky -----------------------
   Sky night_sky("../assets/stars/");
   // ----------------------------------------------------
+
   // ---------------------- Boxes -----------------------
   size_t num_boxes = 10;
   std::vector<Box> boxes;
@@ -50,6 +54,7 @@ int main(void) {
     boxes[i].color(r, g, b);
   }
   // ----------------------------------------------------
+
   // ---------------------- ground -----------------------
   Shader ground_shader(
     "../shaders/basic_box_vertex.glsl",
@@ -58,8 +63,35 @@ int main(void) {
   Box ground(ground_shader);
   float ground_y = -3.0f;
   ground.scale(1000, 1, 1000);
-  ground.color(0.03f, 0.6f, 0.07f);
+  ground.color(0.03f, 0.1f, 0.07f);
 
+  // ---------------------- grass -----------------------
+
+  size_t num_grass = 100;
+  float grass_height = 2.0f;
+  float grass_y = ground_y + 1.45f;
+  float x_range = 5.0f;
+  float z_range = 5.0f;
+  glm::vec3 grass_axis(0, 1, 0);
+
+  std::vector<Quad> grass;
+
+  for (size_t i = 0; i < num_grass; i++) {
+    float angle = (static_cast<float>(rand()) / RAND_MAX) * 90.0f;
+    float x = (static_cast<float>(rand()) / RAND_MAX) * x_range;
+    float z = (static_cast<float>(rand()) / RAND_MAX) * z_range;
+    Shader quad_shader(
+      "../shaders/grass_vertex.glsl",
+      "../shaders/grass_fragment.glsl"
+    );
+    Quad quad(quad_shader);
+    quad.setTexture("../assets/grass_cut.png");
+    quad.scale(grass_height * 0.30f, grass_height, 0.0);
+    quad.position(x, grass_y, z);
+    quad.rotation(glm::radians(angle), grass_axis);
+
+    grass.push_back(quad);
+  }
   // ---------------------- misc -----------------------
 
   setup_imgui(window);
@@ -83,9 +115,13 @@ int main(void) {
     for (Box box: boxes) {
       box.draw(camera);
     }
-    // ----------------------------------------------------
-    imgui_new_frame(window, width, height);
 
+    for (Quad quad: grass) {
+      quad.draw(camera);
+    }
+    // ----------------------------------------------------
+
+    imgui_new_frame(window, width, height, camera);
     glfwGetWindowSize(window, &width, &height);
     glfwSetWindowAspectRatio(window, width, height);
     glfwSwapBuffers(window);
@@ -158,7 +194,7 @@ void setup_imgui(GLFWwindow* window) {
   // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 }
 
-void imgui_new_frame(GLFWwindow* window, int width, int height) {
+void imgui_new_frame(GLFWwindow* window, int width, int height, Camera& camera) {
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGuiIO& io = ImGui::GetIO();
@@ -166,6 +202,8 @@ void imgui_new_frame(GLFWwindow* window, int width, int height) {
   ImGui::Begin("Editor");
   ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
               1000.0f / io.Framerate, io.Framerate);
+  glm::vec3 pos = camera.pos();
+  ImGui::Text("Camera: %.3f x, %.3f y, %.3f z", pos.x, pos.y, pos.z);
   ImGui::End();
 
   ImGui::Render();

@@ -25,6 +25,7 @@ public:
 
     scale_vec = glm::vec3(1, 1, 1);
     position_vec = glm::vec3(0, 0, 0);
+    color_vec = glm::vec3(1, 1, 1);
   }
 
   void position(float r, float g, float b) {
@@ -41,7 +42,7 @@ public:
       errorMessage << "Color must be between 0 and 1, you gave " << r << ", " << g << ", " << b;
       throw std::logic_error(errorMessage.str());
     }
-    shader.setVec3("color", glm::vec3(r, g, b));
+    color_vec = glm::vec3(r, g, b);
   }
 
   void draw(Camera& camera) {
@@ -51,6 +52,7 @@ public:
       shader.setMat4("projection", camera.projection());
     }
     shader.setMat4("view", camera.view());
+    shader.setVec3("color", color_vec);
 
     glm::mat4 model(1.0f);
     model = glm::translate(model, position_vec);
@@ -68,6 +70,7 @@ private:
 
   glm::vec3 scale_vec;
   glm::vec3 position_vec;
+  glm::vec3 color_vec;
 
   Shader shader;
   std::vector<float> vertices = {
