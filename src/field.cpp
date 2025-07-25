@@ -25,6 +25,7 @@ int main(void) {
 
   Camera camera(60.0f, (float)width, (float)height,
                   near, far, 0.05f, 0.15f);
+  camera.set_pos(0, 3, 0);
   Input input(window);
 
   // ---------------------- Sky -----------------------
@@ -49,7 +50,21 @@ int main(void) {
     boxes[i].color(r, g, b);
   }
   // ----------------------------------------------------
+  // ---------------------- ground -----------------------
+  Shader ground_shader(
+    "../shaders/basic_box_vertex.glsl",
+    "../shaders/basic_box_fragment.glsl"
+  );
+  Box ground(ground_shader);
+  float ground_y = -3.0f;
+  ground.scale(1000, 1, 1000);
+  ground.color(0.03f, 0.6f, 0.07f);
+
+  // ---------------------- misc -----------------------
+
   setup_imgui(window);
+
+  // ---------------------- RENDER LOOP -----------------------
   while (!glfwWindowShouldClose(window)) {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
@@ -61,6 +76,10 @@ int main(void) {
 
     // ---------------------- Scene -----------------------
     night_sky.draw(camera);
+
+    glm::vec3 camera_pos = camera.pos();
+    ground.position(camera_pos.x, ground_y, camera_pos.z);
+    ground.draw(camera);
     for (Box box: boxes) {
       box.draw(camera);
     }

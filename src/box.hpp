@@ -23,11 +23,16 @@ public:
     glEnableVertexAttribArray(2);
     glBindVertexArray(0);
 
-    model = glm::mat4(1.0f);
+    scale_vec = glm::vec3(1, 1, 1);
+    position_vec = glm::vec3(0, 0, 0);
   }
 
   void position(float r, float g, float b) {
-    model = glm::translate(model, glm::vec3(r, g, b));
+    position_vec = glm::vec3(r, g, b);
+  }
+
+  void scale(float x, float y, float z) {
+    scale_vec = glm::vec3(x, y, z);
   }
 
   void color(float r, float g, float b) {
@@ -46,6 +51,10 @@ public:
       shader.setMat4("projection", camera.projection());
     }
     shader.setMat4("view", camera.view());
+
+    glm::mat4 model(1.0f);
+    model = glm::translate(model, position_vec);
+    model = glm::scale(model, scale_vec);
     shader.setMat4("model", model);
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -56,7 +65,9 @@ private:
   unsigned int vbo;
 
   glm::mat4 cameraProjection;
-  glm::mat4 model;
+
+  glm::vec3 scale_vec;
+  glm::vec3 position_vec;
 
   Shader shader;
   std::vector<float> vertices = {

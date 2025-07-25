@@ -42,6 +42,10 @@ public:
     previous_mouse = glm::vec2(width / 2, height / 2);
   }
 
+  void set_pos(float x, float y, float z) {
+    position = glm::vec3(x, y, z);
+  }
+
   glm::mat4 view() const {
     return glm::lookAt(position, position + view_direction, up_vector);
   }
