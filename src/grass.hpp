@@ -124,6 +124,7 @@ public:
     glDrawArraysInstanced(GL_TRIANGLES, 0, 6, num_instances);
   }
 
+  Shader shader;
 private:
   unsigned int vao;
   unsigned int vbo;
@@ -143,16 +144,15 @@ private:
 
   std::vector<glm::mat4> models;
 
-  Shader shader;
   std::vector<float> vertices = {
         // positions          // normals           // texture coords
-        -0.5f, -0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f, -0.5f, 0.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, 0.0f,  1.0f,  0.0f, -1.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, 0.0f,  1.0f,  0.0f, -1.0f,  1.0f,  1.0f,
 
-         0.5f,  0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f, 0.0f,  1.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -0.5f,  0.5f, 0.0f,  1.0f,  0.0f, -1.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f, 0.0f,  1.0f,  0.0f, -1.0f,  0.0f,  0.0f,
   };
 
 };

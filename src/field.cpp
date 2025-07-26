@@ -35,26 +35,6 @@ int main(void) {
   Sky night_sky("../assets/stars/");
   // ----------------------------------------------------
 
-  // ---------------------- Boxes -----------------------
-  size_t num_boxes = 10;
-  std::vector<Box> boxes;
-  for (size_t i = 0; i < num_boxes; i++) {
-    Shader box_shader(
-      "../shaders/basic_box_vertex.glsl",
-      "../shaders/basic_box_fragment.glsl"
-    );
-    boxes.push_back(Box(box_shader));
-    float y = 0;
-    float x = 10 * cos(glm::radians((float)i * 360.0f / num_boxes));
-    float z = 10 * sin(glm::radians((float)i * 360.0f / num_boxes));
-    boxes[i].position(x, y, z);
-    float r = static_cast<float>(rand()) / RAND_MAX;
-    float g = static_cast<float>(rand()) / RAND_MAX;
-    float b = static_cast<float>(rand()) / RAND_MAX;
-    boxes[i].color(r, g, b);
-  }
-  // ----------------------------------------------------
-
   // ---------------------- ground -----------------------
   Shader ground_shader(
     "../shaders/basic_box_vertex.glsl",
@@ -75,16 +55,11 @@ int main(void) {
   );
   Grass grass(grass_shader, num_grass, ground_y);
   grass.setTexture("../assets/grass_cut.png");
-  // ---------------------- moonlight ------------------
-
-  Shader moon_shader(
-    "../shaders/basic_box_vertex.glsl",
-    "../shaders/basic_box_fragment.glsl"
-  );
-  Box moon(moon_shader);
-  moon.color(1.0f, 1.0f, 1.0f);
-  moon.position(336, 321, 83);
-  // -0.71511, -0.624562, -0.313911
+  grass.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
+  grass.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
+  grass.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
+  grass.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+  grass.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
   // ---------------------- tree -----------------------
   size_t num_trees = 30;
   std::vector<Model> trees;
@@ -93,7 +68,6 @@ int main(void) {
     float z_range = num_trees * 10;
     float x = (static_cast<float>(rand()) / RAND_MAX) * x_range - x_range / 2.0f;
     float z = (static_cast<float>(rand()) / RAND_MAX) * z_range - z_range / 2.0f;
-    // float angle = (static_cast<float>(rand()) / RAND_MAX) * 90.0f;
     Shader tree_shader(
       "../shaders/tree_model_vertex.glsl",
       "../shaders/tree_model_fragment.glsl"
@@ -109,8 +83,6 @@ int main(void) {
     tree_model.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
     tree_model.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
     tree_model.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
-
-    // cameraPosition, light direction, ambient, diffuse, specular, color
 
     trees.push_back(tree_model);
   }
@@ -135,16 +107,12 @@ int main(void) {
     glm::vec3 camera_pos = camera.pos();
     ground.position(camera_pos.x, ground_y, camera_pos.z);
     ground.draw(camera);
-    for (Box box: boxes) {
-      box.draw(camera);
-    }
 
+    grass.shader.setFloat("time", glfwGetTime());
     grass.draw(camera);
 
     for (Model tree: trees)
       tree.draw(camera);
-
-    moon.draw(camera);
     // ----------------------------------------------------
 
     imgui_new_frame(window, width, height, camera);
