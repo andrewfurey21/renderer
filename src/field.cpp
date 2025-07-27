@@ -10,6 +10,7 @@
 #include "shader.hpp"
 #include "box.hpp"
 #include "sky.hpp"
+#include "animation.hpp"
 
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_glfw.h"
@@ -61,7 +62,7 @@ int main(void) {
   grass.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
   grass.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
   // ---------------------- tree -----------------------
-  size_t num_trees = 30;
+  size_t num_trees = 10;
   std::vector<Model> trees;
   for (size_t i = 0; i < num_trees; i++) {
     float x_range = num_trees * 10;
@@ -86,10 +87,37 @@ int main(void) {
 
     trees.push_back(tree_model);
   }
+  // ---------------------- character -------------------
+
+  // shader uniforms: 
+  // vertex: projection, view, model, finalBonesMatrices
+  // fragment: texture_diffuse1 (should be set), light
+
+  Shader character_shader(
+    "../shaders/character_vertex.glsl",
+    "../shaders/character_fragment.glsl"
+  );
+
+  // const std::string character_file_path = "../assets/old_man_idle/old_man_idle.dae";
+  const std::string character_file_path = "../assets/vampire/dancing_vampire.dae";
+  Model character(character_shader, character_file_path);
+  Animation character_animation(character_file_path, &character);
+
+  Animator character_animator(&character_animation);
+  character.set_scale(0.5, 0.5, 0.5);
+
+  character.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
+  character.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
+  character.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
+  character.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+  character.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
+
 
   // ---------------------- misc -----------------------
 
   setup_imgui(window);
+  float deltaTime = 0;
+  float lastFrame = 0;
 
   // ---------------------- RENDER LOOP -----------------------
   while (!glfwWindowShouldClose(window)) {
@@ -99,6 +127,11 @@ int main(void) {
     process_input(window);
     input.keyboard(camera);
     input.mouse(camera, width, height);
+
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
     // ----------------------------------------------------
 
     // ---------------------- Scene -----------------------
@@ -113,6 +146,12 @@ int main(void) {
 
     for (Model tree: trees)
       tree.draw(camera);
+
+    character_animator.UpdateAnimation(deltaTime);
+    auto transforms = character_animator.GetFinalBoneMatrices();
+    for (int i = 0; i < transforms.size(); ++i) {
+      character.shader.setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+    }
     // ----------------------------------------------------
 
     imgui_new_frame(window, width, height, camera);

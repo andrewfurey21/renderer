@@ -9,10 +9,16 @@
 
 #include "shader.hpp"
 
+#define MAX_BONE_WEIGHTS 4
+
 struct Vertex {
   glm::vec3 position;
   glm::vec3 normal;
   glm::vec2 textureCoords;
+
+  // animation related.
+  int boneIds[MAX_BONE_WEIGHTS];
+  float weights[MAX_BONE_WEIGHTS];
 };
 
 struct Texture {
@@ -49,29 +55,48 @@ public:
                  indices.data(),
                  GL_STATIC_DRAW);
 
+    // position
+    glEnableVertexAttribArray(0);
     glVertexAttribPointer(0,
                           3,
                           GL_FLOAT,
                           GL_FALSE,
                           sizeof(Vertex),
                           (void*)(offsetof(Vertex, position)));
-    glEnableVertexAttribArray(0);
 
+    // normal
+    glEnableVertexAttribArray(1);
     glVertexAttribPointer(1,
                           3,
                           GL_FLOAT,
                           GL_FALSE,
                           sizeof(Vertex),
                           (void*)(offsetof(Vertex, normal)));
-    glEnableVertexAttribArray(1);
 
+    // texture coords
+    glEnableVertexAttribArray(2);
     glVertexAttribPointer(2,
                           2,
                           GL_FLOAT,
                           GL_FALSE,
                           sizeof(Vertex),
                           (void*)(offsetof(Vertex, textureCoords)));
-    glEnableVertexAttribArray(2);
+
+    // boneIds
+    glEnableVertexAttribArray(3);
+    glVertexAttribIPointer(3,
+                          2,
+                          GL_INT,
+                          sizeof(Vertex),
+                          (void*)(offsetof(Vertex, boneIds)));
+    // weights
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4,
+                          4,
+                          GL_FLOAT,
+                          GL_FALSE,
+                          sizeof(Vertex),
+                          (void*)(offsetof(Vertex, weights)));
 
     glBindVertexArray(0);
   }
