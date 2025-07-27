@@ -102,14 +102,14 @@ int main(void) {
   Model character(character_shader, character_file_path);
   Animation character_animation(character_file_path, &character);
   Animator character_animator(&character_animation);
-  // character.set_scale(0.5, 0.5, 0.5);
-  // character.set_pos(1, 1, 1);
+  // character.set_scale(0.05, 0.05, 0.05);
+  character.set_pos(1, 1, 1);
 
-  character.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
-  character.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
-  character.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
-  character.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-  character.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
+  // character.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
+  // character.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
+  // character.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
+  // character.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+  // character.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
 
 
   // ---------------------- misc -----------------------
@@ -132,7 +132,6 @@ int main(void) {
     lastFrame = currentFrame;
 
     character_animator.UpdateAnimation(deltaTime);
-    // ----------------------------------------------------
 
     // ---------------------- Scene -----------------------
     // night_sky.draw(camera);
@@ -147,7 +146,7 @@ int main(void) {
     // for (Model tree: trees)
     //   tree.draw(camera);
 
-    auto transforms = character_animator.GetFinalBoneMatrices();
+    std::vector<glm::mat4>& transforms = character_animator.GetFinalBoneMatrices();
     for (int i = 0; i < transforms.size(); ++i) {
       character.shader.setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
     }
@@ -244,4 +243,15 @@ void imgui_new_frame(GLFWwindow* window, int width, int height, Camera& camera, 
   glfwGetFramebufferSize(window, &width, &height);
   glViewport(0, 0, width, height);
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void print_mat4(glm::mat4& m) {
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      std::cout << m[i][j];
+      if (j == 3)
+        std::cout << "\n";
+      else std::cout << ", ";
+    }
+  }
 }

@@ -177,6 +177,7 @@ private:
 
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
       Vertex vertex;
+      SetVertexBoneDataToDefault(vertex);
       glm::vec3 vector;
       vector.x = mesh->mVertices[i].x;
       vector.y = mesh->mVertices[i].y;
@@ -216,11 +217,11 @@ private:
           material, aiTextureType_SPECULAR, "texture_specular");
       textures.insert(textures.end(), specularMaps.begin(),
                       specularMaps.end());
-
-      std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
-		  textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-		  std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-		  textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
+				//
+    //   std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		  // textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+		  // std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+		  // textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
     }
 
     ExtractBoneWeightForVertices(vertices, mesh, scene);
@@ -230,7 +231,7 @@ private:
 
   void SetVertexBoneData(Vertex &vertex, int boneID, float weight) {
     for (int i = 0; i < MAX_BONE_WEIGHTS; ++i) {
-      if (vertex.boneIds[i] < 0) {
+      if (vertex.boneIds[i] == -1) {
         vertex.weights[i] = weight;
         vertex.boneIds[i] = boneID;
         break;
@@ -282,8 +283,7 @@ private:
       for (int weightIndex = 0; weightIndex < numWeights; ++weightIndex) {
         int vertexId = weights[weightIndex].mVertexId;
         float weight = weights[weightIndex].mWeight;
-        assert(vertexId <= vertices.size());
-        SetVertexBoneData(vertices[vertexId], boneID, weight);
+        SetVertexBoneData(vertices.at(vertexId), boneID, weight);
       }
     }
   }

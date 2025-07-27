@@ -49,11 +49,6 @@ public:
                  vertices.data(),
                  GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 sizeof(unsigned int) * indices.size(),
-                 indices.data(),
-                 GL_STATIC_DRAW);
 
     // position
     glEnableVertexAttribArray(0);
@@ -85,18 +80,24 @@ public:
     // boneIds
     glEnableVertexAttribArray(3);
     glVertexAttribIPointer(3,
-                          4,
+                          MAX_BONE_WEIGHTS,
                           GL_INT,
                           sizeof(Vertex),
                           (void*)(offsetof(Vertex, boneIds)));
     // weights
     glEnableVertexAttribArray(4);
     glVertexAttribPointer(4,
-                          4,
+                          MAX_BONE_WEIGHTS,
                           GL_FLOAT,
                           GL_FALSE,
                           sizeof(Vertex),
                           (void*)(offsetof(Vertex, weights)));
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+                 sizeof(unsigned int) * indices.size(),
+                 indices.data(),
+                 GL_STATIC_DRAW);
 
     glBindVertexArray(0);
   }

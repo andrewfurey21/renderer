@@ -21,12 +21,10 @@ out vec3 fragmentNormal;
 out vec2 fragmentTextureCoords;
 
 void main() {
-    vec4 totalPosition = vec4(0.0f);
+    vec4 totalPosition = vec4(0);
     for (int i = 0; i < MAX_BONE_INFLUENCE; i++) {
-        if (boneIds[i] == -1) {
+        if (boneIds[i] == -1)
             continue;
-        }
-
         if (boneIds[i] >= MAX_BONES) {
             totalPosition = vec4(pos, 1.0f);
             break;
@@ -37,7 +35,8 @@ void main() {
         vec3 localNormal = mat3(finalBonesMatrices[boneIds[i]]) * normal;
     }
 
-    gl_Position = projection * view * model * totalPosition;
+    mat4 viewModel = view * model;
+    gl_Position = projection * viewModel * totalPosition;
     fragmentTextureCoords = textureCoords;
 
     fragmentNormal = mat3(transpose(inverse(model))) * normal;

@@ -13,6 +13,7 @@ void initialize_glad();
 void setup_window(GLFWwindow* window, int width, int height);
 void setup_imgui(GLFWwindow* window);
 void imgui_new_frame(GLFWwindow* window, int width, int height, Camera& camera, float deltaTime);
+void print_mat4(glm::mat4& m);
 
 #endif
 
