@@ -10,6 +10,9 @@ cmake_policy(SET CMP0072 NEW)
 find_package(OpenGL REQUIRED)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
+
+link_directories(/usr/local/lib)
+
 add_executable(renderer
   src/field.cpp
   # src/main.cpp

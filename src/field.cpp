@@ -33,7 +33,7 @@ int main(void) {
   Input input(window);
 
   // ---------------------- Sky -----------------------
-  Sky night_sky("../assets/stars/");
+  // Sky night_sky("../assets/stars/");
   // ----------------------------------------------------
 
   // ---------------------- ground -----------------------
@@ -54,13 +54,13 @@ int main(void) {
     "../shaders/grass_vertex.glsl",
     "../shaders/grass_fragment.glsl"
   );
-  Grass grass(grass_shader, num_grass, ground_y);
-  grass.setTexture("../assets/grass_cut.png");
-  grass.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
-  grass.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
-  grass.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
-  grass.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-  grass.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
+  // Grass grass(grass_shader, num_grass, ground_y);
+  // grass.setTexture("../assets/grass_cut.png");
+  // grass.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
+  // grass.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
+  // grass.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
+  // grass.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+  // grass.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
   // ---------------------- tree -----------------------
   size_t num_trees = 10;
   std::vector<Model> trees;
@@ -73,19 +73,19 @@ int main(void) {
       "../shaders/tree_model_vertex.glsl",
       "../shaders/tree_model_fragment.glsl"
     );
-    Model tree_model(tree_shader, "../assets/tree/oak_tree.obj");
-    tree_model.set_scale(.05, .09, .05);
-    tree_model.set_angle(270, glm::vec3(1, 0, 0));
-    tree_model.set_pos(x, ground_y, z);
-
-    // Moon Light
-    tree_model.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
-    tree_model.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
-    tree_model.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
-    tree_model.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    tree_model.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
-
-    trees.push_back(tree_model);
+    // Model tree_model(tree_shader, "../assets/tree/oak_tree.obj");
+    // tree_model.set_scale(.05, .09, .05);
+    // tree_model.set_angle(270, glm::vec3(1, 0, 0));
+    // tree_model.set_pos(x, ground_y, z);
+    //
+    // // Moon Light
+    // tree_model.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
+    // tree_model.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
+    // tree_model.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
+    // tree_model.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    // tree_model.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
+    //
+    // trees.push_back(tree_model);
   }
   // ---------------------- character -------------------
 
@@ -98,13 +98,12 @@ int main(void) {
     "../shaders/character_fragment.glsl"
   );
 
-  // const std::string character_file_path = "../assets/old_man_idle/old_man_idle.dae";
-  const std::string character_file_path = "../assets/vampire/dancing_vampire.dae";
+  const std::string character_file_path = "../assets/old_man_idle.dae";
   Model character(character_shader, character_file_path);
   Animation character_animation(character_file_path, &character);
-
   Animator character_animator(&character_animation);
-  character.set_scale(0.5, 0.5, 0.5);
+  // character.set_scale(0.5, 0.5, 0.5);
+  // character.set_pos(1, 1, 1);
 
   character.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
   character.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
@@ -132,29 +131,30 @@ int main(void) {
     deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
 
+    character_animator.UpdateAnimation(deltaTime);
     // ----------------------------------------------------
 
     // ---------------------- Scene -----------------------
-    night_sky.draw(camera);
+    // night_sky.draw(camera);
 
     glm::vec3 camera_pos = camera.pos();
     ground.position(camera_pos.x, ground_y, camera_pos.z);
-    ground.draw(camera);
+    // ground.draw(camera);
 
-    grass.shader.setFloat("time", glfwGetTime());
-    grass.draw(camera);
+    // grass.shader.setFloat("time", glfwGetTime());
+    // grass.draw(camera);
 
-    for (Model tree: trees)
-      tree.draw(camera);
+    // for (Model tree: trees)
+    //   tree.draw(camera);
 
-    character_animator.UpdateAnimation(deltaTime);
     auto transforms = character_animator.GetFinalBoneMatrices();
     for (int i = 0; i < transforms.size(); ++i) {
       character.shader.setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
     }
+    character.draw(camera);
     // ----------------------------------------------------
 
-    imgui_new_frame(window, width, height, camera);
+    imgui_new_frame(window, width, height, camera, deltaTime);
     glfwGetWindowSize(window, &width, &height);
     glfwSetWindowAspectRatio(window, width, height);
     glfwSwapBuffers(window);
@@ -227,7 +227,7 @@ void setup_imgui(GLFWwindow* window) {
   // io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 }
 
-void imgui_new_frame(GLFWwindow* window, int width, int height, Camera& camera) {
+void imgui_new_frame(GLFWwindow* window, int width, int height, Camera& camera, float deltaTime) {
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGuiIO& io = ImGui::GetIO();
@@ -237,6 +237,7 @@ void imgui_new_frame(GLFWwindow* window, int width, int height, Camera& camera) 
               1000.0f / io.Framerate, io.Framerate);
   glm::vec3 pos = camera.pos();
   ImGui::Text("Camera: %.3f x, %.3f y, %.3f z", pos.x, pos.y, pos.z);
+  ImGui::Text("Delta Time: %.3f", deltaTime);
   ImGui::End();
 
   ImGui::Render();

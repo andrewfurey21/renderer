@@ -85,7 +85,7 @@ public:
     // boneIds
     glEnableVertexAttribArray(3);
     glVertexAttribIPointer(3,
-                          2,
+                          4,
                           GL_INT,
                           sizeof(Vertex),
                           (void*)(offsetof(Vertex, boneIds)));
@@ -109,11 +109,11 @@ public:
       glActiveTexture(GL_TEXTURE0 + i);
       std::string number;
       std::string name = textures[i].type;
-      if(name == "texture_diffuse")
+      if(name == "texture_diffuse") { 
         number = std::to_string(diffuse++);
+      }
       else if(name == "texture_specular") {
         number = std::to_string(specular++);
-        // std::cout << "specular\n";
       }
       else {
         std::ostringstream error_message;

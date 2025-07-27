@@ -25,13 +25,12 @@ public:
   Model(Shader shader, const std::string &file_path) : shader(shader) {
     Assimp::Importer importer;
     const aiScene *scene =
-        // importer.ReadFile(file_path, aiProcess_Triangulate | aiProcess_FlipUVs);
-        importer.ReadFile(file_path, aiProcess_Triangulate);
+        importer.ReadFile(file_path, aiProcess_Triangulate | aiProcess_FlipUVs);
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
         !scene->mRootNode) {
-      std::cout << "scene pointer: " << scene << "\n";
       std::ostringstream error_message;
-      error_message << "Could not import model at: " << file_path << "\n" << importer.GetErrorString();
+      error_message << "Could not import model at: " << file_path << "\n"
+                    << importer.GetErrorString();
       throw std::logic_error(error_message.str());
     }
     dir = file_path.substr(0, file_path.find_last_of("/"));
@@ -46,7 +45,7 @@ public:
     glm::mat4 model(1.0f);
     model = glm::translate(model, position);
     model = glm::scale(model, scale);
-    model = glm::rotate(model, angle, axis);
+    // model = glm::rotate(model, angle, axis);
     shader.setMat4("projection", camera.projection());
     shader.setMat4("view", camera.view());
     shader.setMat4("model", model);
@@ -67,9 +66,7 @@ public:
 
   Shader shader;
 
-  std::map<std::string, BoneInfo> &get_bone_info_map() {
-    return bone_info_map;
-  }
+  std::map<std::string, BoneInfo> &get_bone_info_map() { return bone_info_map; }
   int bone_count() { return bone_counter; }
 
 private:
@@ -84,7 +81,6 @@ private:
 
   std::map<std::string, BoneInfo> bone_info_map;
   int bone_counter;
-
 
   void SetVertexBoneDataToDefault(Vertex &vertex) {
     for (int i = 0; i < MAX_BONE_WEIGHTS; i++) {
@@ -138,8 +134,10 @@ private:
 
       stbi_image_free(data);
     } else {
-      std::cout << "Texture failed to load at path: " << path << std::endl;
       stbi_image_free(data);
+      std::ostringstream error_message;
+      error_message << "Could not load texture at: " << filename << "\n";
+      throw std::logic_error(error_message.str());
     }
 
     return textureID;
@@ -209,17 +207,20 @@ private:
     }
     // process material
     if (mesh->mMaterialIndex >= 0) {
-      if (mesh->mMaterialIndex >= 0) {
-        aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-        std::vector<Texture> diffuseMaps = loadMaterialTextures(
-            material, aiTextureType_DIFFUSE, "texture_diffuse");
-        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+      aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
+      std::vector<Texture> diffuseMaps = loadMaterialTextures(
+          material, aiTextureType_DIFFUSE, "texture_diffuse");
+      textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-        std::vector<Texture> specularMaps = loadMaterialTextures(
-            material, aiTextureType_SPECULAR, "texture_specular");
-        textures.insert(textures.end(), specularMaps.begin(),
-                        specularMaps.end());
-      }
+      std::vector<Texture> specularMaps = loadMaterialTextures(
+          material, aiTextureType_SPECULAR, "texture_specular");
+      textures.insert(textures.end(), specularMaps.begin(),
+                      specularMaps.end());
+
+      std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		  textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+		  std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+		  textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
     }
 
     ExtractBoneWeightForVertices(vertices, mesh, scene);
@@ -258,15 +259,16 @@ private:
     return to;
   }
 
-  void ExtractBoneWeightForVertices(std::vector<Vertex> &vertices, aiMesh *mesh,
-                                    const aiScene *scene) {
+  void ExtractBoneWeightForVertices(std::vector<Vertex> &vertices, 
+                                    aiMesh *mesh, const aiScene *scene) {
     for (int boneIndex = 0; boneIndex < mesh->mNumBones; ++boneIndex) {
       int boneID = -1;
       std::string boneName = mesh->mBones[boneIndex]->mName.C_Str();
       if (bone_info_map.find(boneName) == bone_info_map.end()) {
         BoneInfo newBoneInfo;
         newBoneInfo.id = bone_counter;
-        newBoneInfo.offset = ConvertMatrixToGLMFormat(mesh->mBones[boneIndex]->mOffsetMatrix);
+        newBoneInfo.offset =
+            ConvertMatrixToGLMFormat(mesh->mBones[boneIndex]->mOffsetMatrix);
         bone_info_map[boneName] = newBoneInfo;
         boneID = bone_counter;
         bone_counter++;
