@@ -28,12 +28,12 @@ int main(void) {
 
   // ---------------------- Camera + Input --------------
   Camera camera(60.0f, (float)width, (float)height,
-                  near, far, 1.0f, 0.15f);
+                  near, far, 0.5f, 0.15f);
   camera.set_pos(0, 3, 0);
   Input input(window);
 
   // ---------------------- Sky -----------------------
-  // Sky night_sky("../assets/stars/");
+  Sky night_sky("../assets/stars/");
   // ----------------------------------------------------
 
   // ---------------------- ground -----------------------
@@ -43,9 +43,8 @@ int main(void) {
   );
   Box ground(ground_shader);
   float ground_y = -3.0f;
-  ground.scale(1000, 1, 1000);
+  ground.scale(100000, 1, 100000);
   ground.color(0.03f, 0.1f, 0.07f);
-
   // ---------------------- grass -----------------------
 
   size_t num_grass = 1000000;
@@ -54,62 +53,57 @@ int main(void) {
     "../shaders/grass_vertex.glsl",
     "../shaders/grass_fragment.glsl"
   );
-  // Grass grass(grass_shader, num_grass, ground_y);
-  // grass.setTexture("../assets/grass_cut.png");
-  // grass.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
-  // grass.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
-  // grass.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
-  // grass.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-  // grass.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
+  Grass grass(grass_shader, num_grass, ground_y);
+  grass.setTexture("../assets/grass_cut.png");
+  grass.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
+  grass.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
+  grass.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
+  grass.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+  grass.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
   // ---------------------- tree -----------------------
-  size_t num_trees = 10;
+  size_t num_trees = 5;
   std::vector<Model> trees;
   for (size_t i = 0; i < num_trees; i++) {
-    float x_range = num_trees * 10;
-    float z_range = num_trees * 10;
+    float x_range = num_trees * 100;
+    float z_range = num_trees * 100;
     float x = (static_cast<float>(rand()) / RAND_MAX) * x_range - x_range / 2.0f;
     float z = (static_cast<float>(rand()) / RAND_MAX) * z_range - z_range / 2.0f;
     Shader tree_shader(
       "../shaders/tree_model_vertex.glsl",
       "../shaders/tree_model_fragment.glsl"
     );
-    // Model tree_model(tree_shader, "../assets/tree/oak_tree.obj");
-    // tree_model.set_scale(.05, .09, .05);
-    // tree_model.set_angle(270, glm::vec3(1, 0, 0));
-    // tree_model.set_pos(x, ground_y, z);
-    //
-    // // Moon Light
-    // tree_model.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
-    // tree_model.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
-    // tree_model.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
-    // tree_model.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    // tree_model.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
-    //
-    // trees.push_back(tree_model);
+    Model tree_model(tree_shader, "../assets/tree/oak_tree.obj");
+    tree_model.set_scale(.05, .09, .05);
+    tree_model.set_angle(270, glm::vec3(1, 0, 0));
+    tree_model.set_pos(x, ground_y, z);
+
+    // Moon Light
+    tree_model.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
+    tree_model.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
+    tree_model.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
+    tree_model.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    tree_model.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
+
+    trees.push_back(tree_model);
   }
   // ---------------------- character -------------------
-
-  // shader uniforms: 
-  // vertex: projection, view, model, finalBonesMatrices
-  // fragment: texture_diffuse1 (should be set), light
-
   Shader character_shader(
     "../shaders/character_vertex.glsl",
     "../shaders/character_fragment.glsl"
   );
 
-  const std::string character_file_path = "../assets/old_man_idle.dae";
+  const std::string character_file_path = "../assets/vampire/dancing_vampire.dae";
   Model character(character_shader, character_file_path);
   Animation character_animation(character_file_path, &character);
   Animator character_animator(&character_animation);
-  // character.set_scale(0.05, 0.05, 0.05);
-  character.set_pos(1, 1, 1);
+  character.set_scale(2, 2, 2);
+  character.set_pos(50, -1, 1);
 
-  // character.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
-  // character.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
-  // character.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
-  // character.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-  // character.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
+  character.shader.setVec3("light.direction", glm::vec3(-0.71511, -0.624562, -0.313911));
+  character.shader.setVec3("light.ambient",  glm::vec3(0.2f, 0.2f, 0.2f));
+  character.shader.setVec3("light.diffuse",  glm::vec3(0.5f, 0.5f, 0.5f));
+  character.shader.setVec3("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+  character.shader.setVec3("light.color", glm::vec3(1.0f, 1.0f, 1.0f));
 
 
   // ---------------------- misc -----------------------
@@ -134,22 +128,23 @@ int main(void) {
     character_animator.UpdateAnimation(deltaTime);
 
     // ---------------------- Scene -----------------------
-    // night_sky.draw(camera);
+    night_sky.draw(camera);
 
     glm::vec3 camera_pos = camera.pos();
     ground.position(camera_pos.x, ground_y, camera_pos.z);
-    // ground.draw(camera);
+    ground.draw(camera);
 
-    // grass.shader.setFloat("time", glfwGetTime());
-    // grass.draw(camera);
+    grass.shader.setFloat("time", glfwGetTime());
+    grass.draw(camera);
 
-    // for (Model tree: trees)
-    //   tree.draw(camera);
+    for (Model tree: trees)
+      tree.draw(camera);
 
     std::vector<glm::mat4>& transforms = character_animator.GetFinalBoneMatrices();
     for (int i = 0; i < transforms.size(); ++i) {
       character.shader.setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
     }
+    character.shader.setVec3("cameraPosition", camera.pos());
     character.draw(camera);
     // ----------------------------------------------------
 

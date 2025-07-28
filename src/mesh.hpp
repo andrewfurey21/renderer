@@ -123,10 +123,10 @@ public:
         throw std::logic_error(error_message.str());
       }
 
-      shader.setInt(("material." + name + number).c_str(), i);
+      shader.setInt((name + number).c_str(), i);
+      // shader.setInt(("material." + name + number).c_str(), i);
       glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
-    glActiveTexture(GL_TEXTURE0);
 
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);

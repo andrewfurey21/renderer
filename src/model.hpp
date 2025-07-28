@@ -37,15 +37,16 @@ public:
     processNode(scene->mRootNode, scene);
 
     angle = 0;
-    scale = glm::vec3(1, 1, 1);
-    position = glm::vec3(0, 0, 0);
+    scale = glm::vec3(1.0f);
+    position = glm::vec3(0.0f);
+    axis = glm::vec3(1.0f, 0, 0);
   }
 
   int draw(Camera &camera) {
     glm::mat4 model(1.0f);
     model = glm::translate(model, position);
     model = glm::scale(model, scale);
-    // model = glm::rotate(model, angle, axis);
+    model = glm::rotate(model, angle, axis);
     shader.setMat4("projection", camera.projection());
     shader.setMat4("view", camera.view());
     shader.setMat4("model", model);
