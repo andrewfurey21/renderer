@@ -45,23 +45,31 @@ public:
     color_vec = glm::vec3(r, g, b);
   }
 
-  void draw(Camera& camera) {
-    shader.bind();
-    if (camera.projection() != cameraProjection) {
-      cameraProjection = camera.projection();
-      shader.setMat4("projection", camera.projection());
-    }
-    shader.setMat4("view", camera.view());
-    shader.setVec3("color", color_vec);
-
+  void draw(Camera& camera, bool shadow = false) {
     glm::mat4 model(1.0f);
     model = glm::translate(model, position_vec);
     model = glm::scale(model, scale_vec);
-    shader.setMat4("model", model);
+    if (shadow) {
+      shadow_shader.bind();
+      shadow_shader.setMat4("model", model);
+    }
+    else {
+      shader.bind();
+      if (camera.projection() != cameraProjection) {
+        cameraProjection = camera.projection();
+        shader.setMat4("projection", camera.projection());
+      }
+      shader.setMat4("view", camera.view());
+      shader.setVec3("color", color_vec);
+
+      shader.setMat4("model", model);
+    }
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, 36);
   }
 
+  Shader shader;
+  Shader shadow_shader;
 private:
   unsigned int vao;
   unsigned int vbo;
@@ -72,7 +80,6 @@ private:
   glm::vec3 position_vec;
   glm::vec3 color_vec;
 
-  Shader shader;
   std::vector<float> vertices = {
         // positions          // normals           // texture coords
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,

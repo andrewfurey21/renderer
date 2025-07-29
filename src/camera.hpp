@@ -17,7 +17,6 @@ private:
   float width, height;
 
   glm::vec3 position;
-  glm::vec3 view_direction;
   glm::vec3 up_vector;
 
   glm::mat4 proj;
@@ -27,6 +26,7 @@ private:
   float pitch;
 
 public:
+  glm::vec3 view_direction;
   float yaw;
   Camera(float fovy, float width, float height, float near, float far,
          float move_speed, float angular_speed)
@@ -46,7 +46,7 @@ public:
     position = glm::vec3(x, y, z);
   }
 
-  glm::mat4 view() const {
+  const glm::mat4 view() {
     return glm::lookAt(position, position + view_direction, up_vector);
   }
 

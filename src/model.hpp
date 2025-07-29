@@ -42,18 +42,25 @@ public:
     axis = glm::vec3(1.0f, 0, 0);
   }
 
-  int draw(Camera &camera) {
+  int draw(Camera &camera, bool shadow = false) {
     glm::mat4 model(1.0f);
     model = glm::translate(model, position);
     model = glm::scale(model, scale);
     model = glm::rotate(model, angle, axis);
-    shader.setMat4("projection", camera.projection());
-    shader.setMat4("view", camera.view());
-    shader.setMat4("model", model);
-    int draw_calls = 0;
-    for (int i = 0; i < meshes.size(); i++)
-      draw_calls += meshes[i].draw(shader);
-    return draw_calls;
+    if (shadow) {
+      shadow_shader.setMat4("model", model);
+      for (int i = 0; i < meshes.size(); i++)
+          meshes[i].draw(shadow_shader);
+    }
+    else {
+      shader.setMat4("projection", camera.projection());
+      shader.setMat4("view", camera.view());
+      shader.setMat4("model", model);
+
+      for (int i = 0; i < meshes.size(); i++)
+          meshes[i].draw(shader);
+    }
+    return 0;
   }
 
   void set_pos(float x, float y, float z) { position = glm::vec3(x, y, z); }
@@ -66,6 +73,7 @@ public:
   }
 
   Shader shader;
+  Shader shadow_shader;
 
   std::map<std::string, BoneInfo> &get_bone_info_map() { return bone_info_map; }
   int bone_count() { return bone_counter; }

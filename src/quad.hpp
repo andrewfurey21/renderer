@@ -105,6 +105,7 @@ public:
     glDrawArrays(GL_TRIANGLES, 0, 6);
   }
 
+  Shader shader;
 private:
   unsigned int vao;
   unsigned int vbo;
@@ -121,7 +122,6 @@ private:
   glm::vec3 rotation_axis;
   float radians;
 
-  Shader shader;
   std::vector<float> vertices = {
         // positions          // normals           // texture coords
         -0.5f, -0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
