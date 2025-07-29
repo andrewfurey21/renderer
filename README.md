@@ -2,6 +2,8 @@
 
 An OpenGL renderer from scratch in C++17.
 
+![photo of the scene](../assets/image.png)
+
 ## Features
 
 - [x] textures

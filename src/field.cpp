@@ -97,7 +97,7 @@ int main(void) {
     apples.push_back(apple);
   }
 
-  size_t num_trees = 2;
+  size_t num_trees = 20;
   std::vector<std::pair<Model, Quad>> trees;
   for (size_t i = 0; i < num_trees; i++) {
     float x_range = num_trees * 100;
