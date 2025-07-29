@@ -27,8 +27,8 @@ public:
 
     float grass_height = 2.0f;
     float grass_y = ground_y + 1.45f;
-    float x_range = sqrt((double)num_instances);
-    float z_range = sqrt((double)num_instances);
+    float x_range = sqrt((double)num_instances) * 10;
+    float z_range = sqrt((double)num_instances) * 10;
     glm::vec3 grass_axis(0, 1, 0);
   
     for (size_t i = 0; i < num_instances; i++) {

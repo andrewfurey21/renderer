@@ -58,8 +58,8 @@ public:
     glBindVertexArray(0);
   }
 
-  void position(float r, float g, float b) {
-    position_vec = glm::vec3(r, g, b);
+  void position(float x, float y, float z) {
+    position_vec = glm::vec3(x, y, z);
   }
 
   void scale(float x, float y, float z) {
@@ -98,8 +98,8 @@ public:
     }
 
     glm::mat4 model(1.0f);
-    model = glm::translate(model, position_vec);
     model = glm::rotate(model, radians, rotation_axis);
+    model = glm::translate(model, position_vec);
     model = glm::scale(model, scale_vec);
     shader.setMat4("model", model);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -124,13 +124,13 @@ private:
 
   std::vector<float> vertices = {
         // positions          // normals           // texture coords
-        -0.5f, -0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
+        -1.0f, 0.0f, -1.0f,  0.0f,  1.0f, 0.0f,  0.0f,  0.0f,
+         1.0f, 0.0f, -1.0f,  0.0f,  1.0f, 0.0f,  1.0f,  0.0f,
+         1.0f,  0.0f, 1.0f,  0.0f,  1.0f, 0.0f,  1.0f,  1.0f,
 
-         0.5f,  0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  1.0f,  1.0f,
-        -0.5f,  0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, 0.0f,  0.0f,  0.0f, -1.0f,  0.0f,  0.0f,
+         1.0f,  0.0f, 1.0f,  0.0f,  1.0f, 0.0f,  1.0f,  1.0f,
+        -1.0f,  0.0f, 1.0f,  0.0f,  1.0f, 0.0f,  0.0f,  1.0f,
+        -1.0f, 0.0f, -1.0f,  0.0f,  1.0f, 0.0f,  0.0f,  0.0f,
   };
 
 };

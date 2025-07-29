@@ -26,6 +26,7 @@ public:
     scale_vec = glm::vec3(1, 1, 1);
     position_vec = glm::vec3(0, 0, 0);
     color_vec = glm::vec3(1, 1, 1);
+    pos = glm::vec3(0);
   }
 
   void position(float r, float g, float b) {
@@ -47,7 +48,7 @@ public:
 
   void draw(Camera& camera, bool shadow = false) {
     glm::mat4 model(1.0f);
-    model = glm::translate(model, position_vec);
+    model = glm::translate(model, pos + position_vec);
     model = glm::scale(model, scale_vec);
     if (shadow) {
       shadow_shader.bind();
@@ -70,6 +71,8 @@ public:
 
   Shader shader;
   Shader shadow_shader;
+  glm::vec3 position_vec;
+  glm::vec3 pos;
 private:
   unsigned int vao;
   unsigned int vbo;
@@ -77,7 +80,6 @@ private:
   glm::mat4 cameraProjection;
 
   glm::vec3 scale_vec;
-  glm::vec3 position_vec;
   glm::vec3 color_vec;
 
   std::vector<float> vertices = {

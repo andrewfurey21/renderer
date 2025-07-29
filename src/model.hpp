@@ -78,8 +78,8 @@ public:
   std::map<std::string, BoneInfo> &get_bone_info_map() { return bone_info_map; }
   int bone_count() { return bone_counter; }
 
-private:
   glm::vec3 position;
+private:
   glm::vec3 scale;
   float angle;
   glm::vec3 axis;
